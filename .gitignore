@@ -1,0 +1,6 @@
+*.input
+*.test*
+*.hi
+*.o
+*.prof
+*.swp
