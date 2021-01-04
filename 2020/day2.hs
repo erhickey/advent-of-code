@@ -1,8 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-import qualified Data.ByteString.Char8 as BS (lines, readFile)
 import Data.Either (rights)
+import qualified Data.Text.IO as T (readFile)
+import qualified Data.Text as T (lines)
 
-import Data.Attoparsec.ByteString.Char8 (char, decimal, letter_ascii, many', parseOnly, Parser, string)
+import Data.Attoparsec.Text (char, decimal, letter, many', parseOnly, Parser, string)
 
 type Password = (Int, Int, Char, String)
 
@@ -12,9 +13,9 @@ lineParser = do
   char '-'
   high <- decimal
   char ' '
-  c <- letter_ascii
+  c <- letter
   string ": "
-  s <- many' letter_ascii
+  s <- many' letter
   return (low, high, c, s)
 
 isValid :: Password -> Bool
@@ -30,6 +31,6 @@ isValid2 (l, h, c, s)
         c2 = s !! (h - 1)
 
 main = do
-  input <- rights . map (parseOnly lineParser) . BS.lines <$> BS.readFile "day2.input"
+  input <- rights . map (parseOnly lineParser) . T.lines <$> T.readFile "day2.input"
   print . (++) "Part 1: " . show . length $ filter isValid input
   print . (++) "Part 2: " . show . length $ filter isValid2 input

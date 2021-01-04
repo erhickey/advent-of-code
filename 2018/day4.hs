@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 import Control.Applicative ((<|>))
 import Data.Bifunctor (second)
-import qualified Data.ByteString as BS (readFile)
-import qualified Data.ByteString.Char8 as BS (lines)
+import qualified Data.Text.IO as T (readFile)
+import qualified Data.Text as T (lines)
 import Data.Either (rights)
 import Data.List (group, maximumBy, sort)
 import qualified Data.IntMap as M (empty, insertWith, IntMap, toList)
 import Data.Ord (comparing)
 
-import Data.Attoparsec.ByteString.Char8 (anyChar, count, decimal, digit, parseOnly, Parser, string)
+import Data.Attoparsec.Text (anyChar, count, decimal, digit, parseOnly, Parser, string)
 
 data LogEntry = Sleep Int | Wake Int | Start Int
 
@@ -39,7 +39,7 @@ mostFrequent :: Ord a => [a] -> [a]
 mostFrequent = maximumBy (comparing length) . group . sort
 
 main = do
-  input <- M.toList . readLogEntries . rights . map (parseOnly logEntryParser) . sort . BS.lines <$> BS.readFile "day4.input"
+  input <- M.toList . readLogEntries . rights . map (parseOnly logEntryParser) . sort . T.lines <$> T.readFile "day4.input"
   let (p1Guard, p1Minutes) = maximumBy (comparing $ length . snd) input
       (p2Guard, p2Minute:_) = maximumBy (comparing $ length . snd) $ map (second mostFrequent) input
   print . (++) "Part 1: " . show $ p1Guard * head (mostFrequent p1Minutes)
