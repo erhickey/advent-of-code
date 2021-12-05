@@ -1,0 +1,22 @@
+cabal-version:  2.4
+name:           aoc
+version:        0.0.0.0
+
+library
+  default-language:   Haskell2010
+  build-depends:      base ^>= 4.13.0.0,
+                      split,
+                      Unique
+  ghc-options:        -Wall
+                      -Wcompat
+                      -Widentities
+                      -Wincomplete-uni-patterns
+                      -Wincomplete-record-updates
+  if impl(ghc >= 8.0)
+    ghc-options:      -Wredundant-constraints
+  if impl(ghc >= 8.2)
+    ghc-options:      -fhide-source-paths
+  if impl(ghc >= 8.4)
+    ghc-options:      -Wmissing-export-lists
+                      -Wpartial-fields
+  hs-source-dirs:     2015, 2016, 2017, 2018, 2019, 2020, 2021

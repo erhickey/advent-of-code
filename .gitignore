@@ -4,3 +4,5 @@
 *.o
 *.prof
 *.swp
+
+/dist-newstyle
