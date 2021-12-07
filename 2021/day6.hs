@@ -1,25 +1,11 @@
-import Data.IntMap.Strict ((!), IntMap)
-import qualified Data.IntMap.Strict as IM (fromList)
+passDay :: [Int] -> [Int]
+passDay [f0, f1, f2, f3, f4, f5, f6, f7, f8] = [f1, f2, f3, f4, f5, f6, f7 + f0, f8, f0]
 
-passDays :: Int -> Int -> Int
-passDays 0 _ = 1
-passDays t 0 = passDays (t - 1) 6 + passDays (t - 1) 8
-passDays t f = if t > f then passDays (t - f) 0 else 1
-
-buildMap :: Int -> IntMap Int
-buildMap n = IM.fromList
-  [ (1, passDays n 1)
-  , (2, passDays n 2)
-  , (3, passDays n 3)
-  , (4, passDays n 4)
-  , (5, passDays n 5)
-  ]
-
-answer :: Int -> [Int] -> Int
-answer t = sum . map (fm !)
-  where fm = buildMap t
+initialize :: [Int] -> [Int]
+initialize xs = map go [0..8]
+  where go n = length $ filter (==n) xs
 
 main = do
-  input <- read . (\s -> "[" ++ s ++ "]") <$> readFile "day6.input" :: IO [Int]
-  print . (++) "Part 1: " . show $ answer 80 input
-  print . (++) "Part 2: " . show $ answer 256 input
+  input <- initialize . read . (\s -> "[" ++ s ++ "]") <$> readFile "day6.input"
+  print . (++) "Part 1: " . show . sum $ iterate passDay input !! 80
+  print . (++) "Part 2: " . show . sum $ iterate passDay input !! 256
