@@ -9,7 +9,8 @@ library
                       containers,
                       split,
                       text,
-                      Unique
+                      Unique,
+                      vector
   ghc-options:        -Wall
                       -Wcompat
                       -Widentities
