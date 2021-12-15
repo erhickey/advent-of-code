@@ -1,49 +1,44 @@
-import Data.Set (Set)
-import qualified Data.Set as S (difference, empty, foldl, fromList, size, union)
-import Data.Vector (Vector)
-import qualified Data.Vector as V ((!), findIndices, fromList, length, map, toList, unsafeUpd)
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M (adjust, filter, fromList, keys, map, size)
+import qualified Data.Set as S (deleteAt, elemAt, empty, fromList, null, union)
 
-type Octopus = (Int, [Int])
-type Octopi = Vector Octopus
+type Coord = (Int, Int)
+type Grid = Map Coord Int
 
-parse :: [String] -> Octopi
-parse ss = V.fromList . concat $ zipWith parseLine [0..] ss
-  where
-    maxX = length (head ss) - 1
-    maxY = length ss - 1
-    parseLine y = zipWith (\x n -> (read [n], neighbors (x, y))) [0..]
-    inbounds (x, y) = x <= maxX && y <= maxY && x >= 0 && y >= 0
-    coordToIndex (x, y) = y * (maxX + 1) + x
-    neighbors (x, y) = map coordToIndex $ filter inbounds
+parse :: [String] -> Grid
+parse = M.fromList . concat . zipWith parseLine [0..]
+  where parseLine y = zipWith (\x n -> ((x, y), read [n])) [0..]
+
+neighbors :: Coord -> [Coord]
+neighbors (x, y) =
       [ (x - 1, y - 1), (x - 1, y), (x - 1, y + 1)
       , (x, y - 1), (x, y + 1)
       , (x + 1, y - 1), (x + 1, y), (x + 1, y + 1)
       ]
 
-step :: Octopi -> (Set Int, Octopi)
-step v = (flashed, part3)
+tick :: Grid -> Grid
+tick g = step3
   where
-    part1 = V.map (\(o, ns) -> (o + 1, ns)) v
-    (flashed, part2) = converge done $ iterate flashes (S.empty, part1)
-    part3 = V.map (\(o, ns) -> (if o > 9 then 0 else o, ns)) part2
-    flashIndices = S.fromList . V.toList . V.findIndices ((>9) . fst)
-    done (o1, _) (o2, _) = o1 == o2
-    flashes (s, os) = let toFlash = S.difference (flashIndices os) s in (S.union s toFlash, S.foldl flash os toFlash)
-    flash os ix = let (_, ns) = os V.! ix in V.unsafeUpd os $ map (\n -> (n, inc os n)) ns
-    inc os ix = let (o, ns) = os V.! ix in (o + 1, ns)
+    step1 = M.map (+1) g
+    step2 = flashes step1
+    step3 = M.map (\o -> if o > 9 then 0 else o) step2
 
-converge :: (a -> a -> Bool) -> [a] -> a
-converge f (x:y:ys)
-  | f x y = x
-  | otherwise = converge f (y:ys)
+flashes :: Grid -> Grid
+flashes = go S.empty
+  where
+    toFlash s = S.union s . S.fromList . M.keys . M.filter (==10)
+    flash g c = M.adjust (+1) c . foldl (flip (M.adjust (+1))) g $ neighbors c
+    go s g
+      | S.null s' = g
+      | otherwise = go (S.deleteAt 0 s') g'
+      where
+        s' = toFlash s g
+        g' = flash g $ S.elemAt 0 s'
 
-steps :: Octopi -> [(Set Int, Octopi)]
-steps os = iterate (step . snd) (S.empty, os)
-
-allFlashed :: [(Set Int, Octopi)] -> [(Set Int, Octopi)]
-allFlashed = takeWhile (\(s, v) -> S.size s /= V.length v)
+flashed :: Grid -> Int
+flashed = M.size . M.filter (==0)
 
 main = do
   input <- parse . lines <$> readFile "day11.input"
-  print . (++) "Part 1: " . show . sum . map (S.size . fst) . take 101 $ steps input
-  print . (++) "Part 2: " . show . length . allFlashed $ steps input
+  print . (++) "Part 1: " . show . sum . map flashed . drop 1 . take 101 $ iterate tick input
+  print . (++) "Part 2: " . show . length . takeWhile (\g -> flashed g /= M.size g) $ iterate tick input
