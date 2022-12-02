@@ -1,3 +1,4 @@
+cookie
 *.input
 *.test*
 *.hi
@@ -5,4 +6,5 @@
 *.prof
 *.swp
 
-/dist-newstyle
+haskell/dist-newstyle
+rust/target
