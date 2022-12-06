@@ -1,7 +1,9 @@
+mod util;
 mod y2015;
 mod y2022;
 
 use std::io::Write;
+use std::time::Instant;
 use std::{env, fs, fmt::Display};
 use std::path::Path;
 
@@ -31,9 +33,13 @@ fn main() {
     };
 
     let solver = get_solver(year, day);
+    let now = Instant::now();
     let (part1, part2) = solver(&input);
+    let elapsed = now.elapsed();
 
-    println!("\nDay: {} Year: {}", day, year);
+    println!("\n{} day {}", year, day);
+    println!("---------------------------");
+    println!("run time: {:.2?}", elapsed);
     println!("---------------------------");
     println!("part 1: {}", part1);
     println!("part 2: {}", part2);

@@ -1,30 +1,6 @@
-use std::{fmt::Display, collections::HashSet, hash::Hash};
+use std::fmt::Display;
 
-fn intersections<T: Eq + Hash>(vs: Vec<Vec<T>>) -> Vec<T> {
-    vs.into_iter()
-        .map(|v| v.into_iter().collect::<HashSet<T>>())
-        .fold(HashSet::new(), |mut acc, hs| {
-            match acc.len() {
-                0 => hs,
-                _ => { acc.retain(|e| hs.contains(e)); acc }
-            }
-        })
-        .drain()
-        .collect()
-}
-
-fn first<T>(v: Vec<T>) -> Option<T> {
-    v.into_iter().nth(0)
-}
-
-fn chunks<T: Clone>(v: Vec<T>, size: usize) -> Vec<Vec<T>> {
-    v.chunks(size).map(|e| e.into()).collect()
-}
-
-fn bisect(s: &str) -> Vec<Vec<char>> {
-    let (s1, s2) = s.split_at(s.len() / 2);
-    vec![s1.chars().collect(), s2.chars().collect()]
-}
+use crate::util::util::{bisect, intersections, first, chunks};
 
 fn item_priority(c: char) -> u32 {
     match c.is_lowercase() {
