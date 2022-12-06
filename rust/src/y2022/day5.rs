@@ -18,15 +18,13 @@ fn parse_stacks(s: &str) -> Stacks {
         .map(|v| v.into_iter().filter(|c| *c != ' ').collect())
         .collect();
 
-    let mut stacks: Stacks = HashMap::new();
-    for line in transposed_lines {
-        let mut v = Vec::<char>::new();
-        let n: u8 = line[0].to_digit(10).unwrap() as u8;
-        (1..line.len()).for_each(|i| v.push(line[i]));
-        stacks.insert(n, v);
-    }
-
-    stacks
+    transposed_lines
+        .into_iter()
+        .map(|line| (
+            line[0].to_digit(10).unwrap() as u8,
+            line.clone().drain(1..).collect()
+        ))
+        .collect()
 }
 
 fn parse_move(s: &str) -> Move {
@@ -54,11 +52,9 @@ fn do_move(sm: Stacks, m: Move, keep_order: bool) -> Stacks {
 }
 
 fn get_message(sm: Stacks) -> String {
-    let mut ret: String = String::new();
-    let mut sorted_keys: Vec<u8> = sm.clone().into_keys().collect();
-    sorted_keys.sort();
-    sorted_keys.iter().for_each(|key| ret.push(*sm.get(&key).unwrap().last().unwrap()));
-    ret
+    let mut sorted_set: Vec<(u8, Vec<char>)> = sm.into_iter().collect();
+    sorted_set.sort();
+    sorted_set.iter().map(|(_, v)| v.last().unwrap()).collect()
 }
 
 pub fn solve(input: &str) -> (Box<dyn Display>, Box<dyn Display>) {
