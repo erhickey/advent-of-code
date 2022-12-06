@@ -35,3 +35,7 @@ pub fn transpose<T: Clone>(vs: Vec<Vec<T>>) -> Vec<Vec<T>>
         .map(|i| vs.iter().map(|v| v[i].clone()).collect::<Vec<T>>())
         .collect()
 }
+
+pub fn all_unique<T: Eq + Hash>(es: Vec<T>) -> bool {
+    es.len() == es.iter().collect::<HashSet<&T>>().len()
+}
