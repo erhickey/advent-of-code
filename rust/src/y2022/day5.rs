@@ -1,6 +1,6 @@
 use std::{fmt::Display, collections::HashMap};
 
-use crate::util::util::transpose;
+use crate::util::vector::transpose;
 
 type Stacks = HashMap<u8, Vec<char>>;
 type Move = [u8; 3];

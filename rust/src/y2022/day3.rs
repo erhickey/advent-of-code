@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::util::util::{bisect, intersections, first, chunks};
+use crate::util::{string::bisect, vector::{intersections, chunks, first}};
 
 fn item_priority(c: char) -> u32 {
     match c.is_lowercase() {

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::util::util::chunks;
+use crate::util::vector::chunks;
 
 #[derive(Clone)]
 struct Cycle {

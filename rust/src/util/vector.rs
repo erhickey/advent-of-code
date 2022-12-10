@@ -24,11 +24,6 @@ pub fn chunks<T: Clone>(v: &Vec<T>, size: usize) -> Vec<Vec<T>> {
         .collect()
 }
 
-pub fn bisect(s: &str) -> Vec<Vec<char>> {
-    let (s1, s2) = s.split_at(s.len() / 2);
-    vec![s1.chars().collect(), s2.chars().collect()]
-}
-
 pub fn transpose<T: Clone>(vs: Vec<Vec<T>>) -> Vec<Vec<T>>
 {
     (0..vs[0].len())

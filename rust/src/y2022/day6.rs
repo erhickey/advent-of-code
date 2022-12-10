@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::util::util::all_unique;
+use crate::util::vector::all_unique;
 
 fn find_marker(input: Vec<char>, m_size: usize) -> usize {
     m_size + input
