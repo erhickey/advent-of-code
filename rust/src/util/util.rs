@@ -17,7 +17,7 @@ pub fn first<T>(v: Vec<T>) -> Option<T> {
     v.into_iter().nth(0)
 }
 
-pub fn chunks<T: Clone>(v: Vec<T>, size: usize) -> Vec<Vec<T>> {
+pub fn chunks<T: Clone>(v: &Vec<T>, size: usize) -> Vec<Vec<T>> {
     v
         .chunks(size)
         .map(|e| e.into())

@@ -14,7 +14,7 @@ pub fn solve(input: &str) -> (Box<dyn Display>, Box<dyn Display>) {
     (
         Box::new(sacks.clone().map(bisect).map(intersections).map(first).flatten().map(item_priority).sum::<u32>()),
         Box::new(
-            chunks(sacks.map(|s| s.chars().collect()).collect(), 3)
+            chunks(&sacks.map(|s| s.chars().collect()).collect(), 3)
                 .into_iter().map(intersections).map(first).flatten().map(item_priority).sum::<u32>()
         )
     )
