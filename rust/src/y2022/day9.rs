@@ -38,28 +38,16 @@ fn update_tail(state: Option<Box<State>>, leader: Point) -> Option<Box<State>> {
 
     let old_tail = state.unwrap();
     let current_pos = &old_tail.head;
+    let x_separation = leader.x_distance(current_pos) > 1;
+    let y_separation = leader.y_distance(current_pos) > 1;
 
-    let head = if
-        leader.x != current_pos.x
-        && leader.y != current_pos.y
-        && (leader.x_distance(current_pos) > 1 || leader.y_distance(current_pos) > 1)
-    {
-        Point {
-            x: if leader.is_left_of(current_pos) { current_pos.x - 1 } else { current_pos.x + 1 },
-            y: if leader.is_under(current_pos) { current_pos.y - 1 } else { current_pos.y + 1 }
-        }
-    } else if leader.x_distance(current_pos) > 1 {
-        Point {
-            x: if leader.is_left_of(current_pos) { current_pos.x - 1 } else { current_pos.x + 1 },
-            y: leader.y
-        }
-    } else if leader.y_distance(current_pos) > 1 {
-        Point {
-            x: leader.x,
-            y: if leader.is_under(current_pos) { current_pos.y - 1 } else { current_pos.y + 1 }
-        }
-    } else {
-        old_tail.head
+    let head = Point {
+        x: if x_separation || y_separation && current_pos.x != leader.x {
+            if leader.is_left_of(current_pos) { current_pos.x - 1 } else { current_pos.x + 1 }
+        } else { current_pos.x },
+        y: if y_separation || x_separation && current_pos.y != leader.y {
+            if leader.is_under(current_pos) { current_pos.y - 1 } else { current_pos.y + 1 }
+        } else { current_pos.y }
     };
 
     Some(Box::new(State { head: head.clone(), tail: update_tail(old_tail.tail, head) }))
