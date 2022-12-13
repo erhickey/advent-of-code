@@ -1,4 +1,4 @@
-use std::{fmt::Display, collections::HashMap};
+use std::fmt::Display;
 
 use nom::{
     sequence::{terminated, delimited, preceded},
@@ -9,6 +9,7 @@ use nom::{
     branch::alt
 };
 
+#[derive(Clone)]
 enum Operation {
     Add(u32),
     Multiply(u32),
@@ -25,8 +26,9 @@ impl Operation {
     }
 }
 
-type Monkeys = HashMap<u8, Monkey>;
+type Monkeys = Vec<Monkey>;
 
+#[derive(Clone)]
 struct Monkey {
     id: u8,
     operation: Operation,
@@ -36,8 +38,9 @@ struct Monkey {
 }
 
 impl Monkey {
-    fn throw_target(&self, n: &u32) -> u8 {
-        if *n == 0 { self.divisible_target } else { self.not_divisible_target }
+    fn throw_target(&self, n: &u32, do_mod: bool) -> u8 {
+        let val = if do_mod { *n % self.divisor } else { *n };
+        if val == 0 { self.divisible_target } else { self.not_divisible_target }
     }
 }
 
@@ -46,46 +49,81 @@ type Items = Vec<Item>;
 #[derive(Clone)]
 struct Item {
     owner: u8,
-    values: HashMap<u8, u32>
+    values: Vec<(Monkey, u32)>
 }
 
 impl Item {
     fn from(value: u32, monkeys: &Monkeys, owner: u8) -> Item {
         Item {
             owner,
-            values: monkeys.values().map(|m| (m.id, value)).collect()
+            values: monkeys.iter().map(|m| (m.clone(), value)).collect()
         }
     }
 
-    fn inspect(&self, monkeys: &Monkeys, current_monkey: &u8, decrease_worry: bool) -> Item {
-        if self.owner != *current_monkey {
-            return self.clone();
+    fn inspect(&mut self, current_monkey: &Monkey, decrease_worry: bool) -> u128 {
+        if self.owner != current_monkey.id {
+            return 0;
         }
 
-        let owner = monkeys.get(&self.owner).unwrap();
-
-        let new_values: HashMap<u8, u32> = self.values.clone().into_iter().map(|(k, v)| {
-            let monkey = monkeys.get(&k).unwrap();
-            let new_value: f32 = owner.operation.execute(&v) as f32 / (if decrease_worry { 3.0 } else { 1.0 });
-            (k, new_value.floor() as u32 % monkey.divisor)
-        }).collect();
-
-        Item {
-            owner: owner.throw_target(new_values.get(&owner.id).unwrap()),
-            values: new_values
+        for (monkey, v) in self.values.iter_mut() {
+            if decrease_worry {
+                *v = current_monkey.operation.execute(&v) / 3;
+            } else {
+                *v = (current_monkey.operation.execute(&v)) % monkey.divisor;
+            }
+            if monkey.id == current_monkey.id {
+                self.owner = current_monkey.throw_target(&v, decrease_worry);
+            }
         }
+
+        1
     }
 }
 
-struct Turn {
-    active_monkey: u8,
-    before: Items,
-    after: Items
+struct State {
+    monkeys: Monkeys,
+    max_monkey: usize,
+    active_monkey: usize,
+    inspect_count: Vec<u128>,
+    items: Items,
+    decrease_worry: bool
 }
 
-impl Turn {
-    fn num_items_inspected(&self) -> usize {
-        self.before.iter().filter(|item| item.owner == self.active_monkey).count()
+impl State {
+    fn from(monkeys: Monkeys, items: Items, decrease_worry: bool) -> State {
+        State {
+            max_monkey: (&monkeys.len() - 1),
+            inspect_count: vec![0; monkeys.len()],
+            monkeys,
+            active_monkey: 0,
+            items,
+            decrease_worry
+        }
+    }
+
+    fn take_turn(&mut self) {
+        let monkey = &self.monkeys[self.active_monkey];
+        let mut inspect_count = 0;
+
+        for item in self.items.iter_mut() {
+            inspect_count += item.inspect(monkey, self.decrease_worry);
+        }
+
+        self.inspect_count[self.active_monkey] = self.inspect_count[self.active_monkey] + inspect_count;
+        self.active_monkey = self.next_monkey();
+    }
+
+    fn next_monkey(&self) -> usize {
+        match self.active_monkey == self.max_monkey {
+            true => 0,
+            false => self.active_monkey + 1
+        }
+    }
+
+    fn calc_monkey_business(&self) -> u128 {
+        let mut sorted_values = self.inspect_count.clone();
+        sorted_values.sort();
+        sorted_values.into_iter().rev().take(2).product()
     }
 }
 
@@ -136,7 +174,7 @@ fn parse_monkey(s: &str) -> (Monkey, Vec<u32>) {
 
 fn parse_monkeys(s: &str) -> (Monkeys, Items) {
     let result = s.split("\n\n").map(parse_monkey);
-    let monkeys: Monkeys = result.clone().map(|(m, _)| (m.id, m)).collect();
+    let monkeys: Monkeys = result.clone().map(|(m, _)| m).collect();
     let items = result.fold(Vec::new(), |mut acc, (m, is)| {
         is.into_iter().for_each(|item| acc.push(Item::from(item, &monkeys, m.id)));
         acc
@@ -144,50 +182,19 @@ fn parse_monkeys(s: &str) -> (Monkeys, Items) {
     (monkeys, items)
 }
 
-fn do_turn(monkeys: &Monkeys, items: &Items, current_monkey: &u8, decrease_worry: bool) -> Turn {
-    Turn {
-        active_monkey: *current_monkey,
-        before: items.clone(),
-        after: items.into_iter().map(|item| item.inspect(monkeys, current_monkey, decrease_worry)).collect()
+fn run(monkeys: Monkeys, items: Items, decrease_worry: bool, rounds: usize) -> u128 {
+    let mut state = State::from(monkeys, items, decrease_worry);
+    for _ in 0..rounds * state.monkeys.len() {
+        state.take_turn();
     }
-}
-
-fn do_round(monkeys: &Monkeys, items: &Items, decrease_worry: bool) -> Vec<Turn> {
-    let mut keys: Vec<&u8> = monkeys.keys().collect();
-    keys.sort();
-    keys.into_iter().fold(Vec::new(), |mut acc, key| {
-        let last_turn = if acc.len() == 0 { items } else { &acc.iter().last().unwrap().after };
-        acc.push(do_turn(monkeys, last_turn, key, decrease_worry));
-        acc
-    })
-}
-
-fn do_rounds(monkeys: &Monkeys, items: &Items, rounds: u32, decrease_worry: bool) -> Vec<Turn> {
-    (0..rounds)
-        .fold(Vec::new(), |mut acc, _| {
-            let last_turn = if acc.len() == 0 { items } else { &acc.iter().last().unwrap().after };
-            acc.extend(do_round(monkeys, last_turn, decrease_worry));
-            acc
-        })
-}
-
-fn calc_monkey_business(turns: Vec<Turn>) -> usize {
-    let mut values: Vec<usize> = turns.iter().fold(HashMap::new(), |mut acc, t| {
-        acc
-            .entry(t.active_monkey)
-            .and_modify(|c| *c += t.num_items_inspected())
-            .or_insert(t.num_items_inspected());
-        acc
-    }).into_values().collect();
-    values.sort();
-    values.iter().rev().take(2).product()
+    state.calc_monkey_business()
 }
 
 pub fn solve(input: &str) -> (Box<dyn Display>, Box<dyn Display>) {
     let (monkeys, items) = parse_monkeys(input);
 
     (
-        Box::new(calc_monkey_business(do_rounds(&monkeys, &items, 20, true))),
-        Box::new(calc_monkey_business(do_rounds(&monkeys, &items, 10000, false)))
+        Box::new(run(monkeys.clone(), items.clone(), true, 20)),
+        Box::new(run(monkeys, items, false, 10000))
     )
 }

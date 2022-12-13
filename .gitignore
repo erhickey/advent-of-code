@@ -1,4 +1,5 @@
 cookie
+flamegraph.svg
 *.input
 *.test*
 *.hi
