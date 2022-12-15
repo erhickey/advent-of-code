@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Point {
     pub x: i32,
     pub y: i32
@@ -23,9 +23,18 @@ impl Point {
         Point { x: self.x + n, y: self.y }
     }
 
+    pub fn neighboring_points(&self) -> Vec<Point> {
+        vec![
+            Point { x: self.x - 1, y: self.y },
+            Point { x: self.x, y: self.y - 1 },
+            Point { x: self.x, y: self.y + 1 },
+            Point { x: self.x + 1, y: self.y },
+        ]
+    }
+
     #[allow(dead_code)]
-    pub fn adjacent_points(&self) -> HashSet<Point> {
-        [
+    pub fn adjacent_points(&self) -> Vec<Point> {
+        vec![
             Point { x: self.x - 1, y: self.y + 1 },
             Point { x: self.x - 1, y: self.y },
             Point { x: self.x - 1, y: self.y - 1 },
@@ -34,7 +43,7 @@ impl Point {
             Point { x: self.x + 1, y: self.y + 1 },
             Point { x: self.x + 1, y: self.y },
             Point { x: self.x + 1, y: self.y - 1 }
-        ].into_iter().collect()
+        ]
     }
 
     #[allow(dead_code)]
@@ -65,7 +74,7 @@ impl Point {
 }
 
 #[allow(dead_code)]
-pub fn pretty_print_grid(ps: &HashSet<Point>) -> String {
+pub fn pretty_print_points(ps: &HashSet<Point>) -> String {
     let xs: Vec<i32> = ps.clone().drain().into_iter().map(|p| p.x).collect();
     let ys: Vec<i32> = ps.clone().drain().into_iter().map(|p| p.y).collect();
     let min_x = xs.clone().into_iter().min().unwrap();
