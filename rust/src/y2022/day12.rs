@@ -1,4 +1,4 @@
-use std::{fmt::Display, str::FromStr};
+use std::fmt::Display;
 
 use rustc_hash::FxHashMap;
 
@@ -27,7 +27,7 @@ fn optimal_path(end: &Point, valid_neighbors: &FxHashMap<Point, Vec<Point>>, gri
 }
 
 pub fn solve(input: &str) -> (Box<dyn Display>, Box<dyn Display>) {
-    let mut grid: Grid<char> = Grid::from_str(input).unwrap();
+    let mut grid: Grid<char> = input.parse().unwrap();
 
     let start = grid.points.clone().into_iter().find(|(_, v)| *v == 'S').unwrap().0;
     let end = grid.points.clone().into_iter().find(|(_, v)| *v == 'E').unwrap().0;
