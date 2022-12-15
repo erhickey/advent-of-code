@@ -1,8 +1,10 @@
-use std::{fmt::Display, collections::{HashMap, HashSet}, str::FromStr};
+use std::{fmt::Display, str::FromStr};
+
+use rustc_hash::FxHashMap;
 
 use crate::util::{grid::Grid, point::Point, dijkstra::dijkstra_shortest};
 
-fn build_neighbor_map(grid: &Grid<char>) -> HashMap<Point, HashSet<Point>> {
+fn build_neighbor_map(grid: &Grid<char>) -> FxHashMap<Point, Vec<Point>> {
     grid
         .points
         .iter()
@@ -15,7 +17,7 @@ fn build_neighbor_map(grid: &Grid<char>) -> HashMap<Point, HashSet<Point>> {
         .collect()
 }
 
-fn optimal_path(end: &Point, valid_neighbors: &HashMap<Point, HashSet<Point>>, grid: Grid<char>) -> u128 {
+fn optimal_path(end: &Point, valid_neighbors: &FxHashMap<Point, Vec<Point>>, grid: Grid<char>) -> u128 {
     grid.points
         .into_iter()
         .filter(|(_, c)| *c == 'a')

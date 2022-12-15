@@ -1,9 +1,11 @@
-use std::{collections::HashMap, hash::Hash, fmt::{Formatter, Display, Error}, str::FromStr};
+use std::{hash::Hash, fmt::{Formatter, Display, Error}, str::FromStr};
+
+use rustc_hash::FxHashMap;
 
 use super::point::Point;
 
 pub struct Grid<T: Clone + Eq + Hash> {
-    pub points: HashMap<Point, T>,
+    pub points: FxHashMap<Point, T>,
     max_x: i32,
     max_y: i32,
     min_x: i32,
@@ -27,7 +29,7 @@ impl<T: Clone + Eq + From<char> + Hash> FromStr for Grid<T> {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut y = -1;
-        let grid: HashMap<Point, T> = s
+        let grid: FxHashMap<Point, T> = s
             .lines()
             .flat_map(|line| {
                 y += 1;
