@@ -75,6 +75,22 @@ impl Point {
             )
             .collect()
     }
+
+    pub fn manhattan_distance(&self, point: &Point) -> u32 {
+        ((self.x - point.x).abs() + (self.y - point.y).abs()) as u32
+    }
+
+    #[allow(dead_code)]
+    pub fn points_in_range(&self, manhattan_distance: u32) -> Vec<Point> {
+        (self.y - manhattan_distance as i32..self.y + manhattan_distance as i32 + 1)
+            .flat_map(|y| {
+                let vert_dist = (self.y - y).abs();
+                let to_expand = manhattan_distance as i32 - vert_dist;
+                (self.x - to_expand..self.x + to_expand + 1)
+                    .map(|x| Point { x, y })
+                    .collect::<Vec<Point>>()
+            }).collect()
+    }
 }
 
 impl FromStr for Point {
