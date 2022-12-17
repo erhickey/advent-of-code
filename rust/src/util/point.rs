@@ -67,13 +67,13 @@ impl Point {
         let min_y = if self.y < point.y { self.y } else { point.y };
         let max_y = if self.y > point.y { self.y } else { point.y };
 
-        (min_y..max_y + 1)
-            .flat_map(|y|
-                (min_x..max_x + 1)
-                    .map(|x| Point { x, y })
-                    .collect::<Vec<Point>>()
-            )
-            .collect()
+        let mut points: Vec<Point> = Vec::new();
+        for y in min_y..max_y + 1 {
+            for x in min_x..max_x + 1 {
+                points.push(Point { x, y });
+            }
+        }
+        points
     }
 
     pub fn manhattan_distance(&self, point: &Point) -> u32 {
@@ -81,15 +81,28 @@ impl Point {
     }
 
     #[allow(dead_code)]
-    pub fn points_in_range(&self, manhattan_distance: u32) -> Vec<Point> {
-        (self.y - manhattan_distance as i32..self.y + manhattan_distance as i32 + 1)
-            .flat_map(|y| {
-                let vert_dist = (self.y - y).abs();
-                let to_expand = manhattan_distance as i32 - vert_dist;
-                (self.x - to_expand..self.x + to_expand + 1)
-                    .map(|x| Point { x, y })
-                    .collect::<Vec<Point>>()
-            }).collect()
+    pub fn circle(&self, manhattan_distance: u32) -> Vec<Point> {
+        let mut points: Vec<Point> = Vec::new();
+        for y in self.y - manhattan_distance as i32..self.y + manhattan_distance as i32 + 1 {
+            let vert_dist = (self.y - y).abs();
+            let to_expand = manhattan_distance as i32 - vert_dist;
+            for x in self.x - to_expand..self.x + to_expand + 1 {
+                points.push(Point { x, y });
+            }
+        }
+        points
+    }
+
+    #[allow(dead_code)]
+    pub fn circumference(&self, manhattan_distance: u32) -> Vec<Point> {
+        let mut points: Vec<Point> = Vec::new();
+        for y in self.y - manhattan_distance as i32..self.y + manhattan_distance as i32 + 1 {
+            let vert_dist = (self.y - y).abs();
+            let to_expand = manhattan_distance as i32 - vert_dist;
+            points.push(Point { x: self.x - to_expand, y });
+            points.push(Point { x: self.x + to_expand, y });
+        }
+        points
     }
 }
 
