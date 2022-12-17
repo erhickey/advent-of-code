@@ -1,78 +1,103 @@
 use std::fmt::Display;
 
+use itertools::{Itertools, enumerate};
+use nohash_hasher::{IntMap, IntSet};
 use nom::{bytes::complete::{tag, take}, sequence::preceded, multi::separated_list1, IResult, branch::alt};
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 
-use crate::util::nom::u_32;
+use crate::util::{nom::u_8, dijkstra::dijkstra_shortest};
 
-#[derive(Clone, Eq, Hash, PartialEq)]
+type Valves = IntMap<u16, Valve>;
+
+#[derive(Clone, Eq, PartialEq)]
 struct Valve {
-    name: String,
-    flow_rate: u32,
-    leads_to: Vec<String>
+    id: u16,
+    flow_rate: u8,
+    leads_to: Vec<u16>,
+    distances: IntMap<u16, u8>
 }
 
 #[derive(Clone)]
 struct State {
-    valves: FxHashMap<String, Valve>,
-    closed_valves: FxHashSet<String>,
-    open_valves: FxHashSet<Valve>,
-    current_valve: String,
-    last_valve: String,
-    pressure_released: u32,
-    all_valves_open: bool,
-    elapsed_time: u8
+    closed_valves: IntSet<u16>,
+    pressure_per_turn: u8,
+    pressure_released: u16,
+    destinations: Vec<(u16, u8)>
 }
 
 impl State {
-    fn open_valve(&mut self) {
-        self.release_pressure();
-        self.closed_valves.remove(&self.current_valve);
-        self.open_valves.insert(self.valves.get(&self.current_valve).unwrap().clone());
-        self.last_valve = String::from("");
-        if self.closed_valves.len() == 0 {
-            self.all_valves_open = true;
+    fn open_valve(&mut self, valve: u16, valves: &Valves) {
+        if self.closed_valves.remove(&valve) {
+            self.pressure_per_turn += valves.get(&valve).unwrap().flow_rate;
         }
-        self.elapsed_time += 1;
     }
 
-    fn move_to(&mut self, valve: String) {
-        self.release_pressure();
-        self.last_valve = self.current_valve.clone();
-        self.current_valve = valve;
-        self.elapsed_time += 1;
+    fn valid_destinations(&self, current_positions: Vec<u16>, valves: &Valves) -> Vec<Vec<(u16, u8)>> {
+        let mut destinations: Vec<Vec<(u16, u8)>> = Vec::new();
+
+        for dest_combo in self.closed_valves.iter().combinations(current_positions.len()) {
+            for pos_perm in current_positions.iter().permutations(current_positions.len()) {
+                let mut ds: Vec<(u16, u8)> = Vec::new();
+                for (ix, pos) in enumerate(&pos_perm) {
+                    let v = valves.get(pos).unwrap();
+                    let dest = dest_combo[ix];
+                    ds.push((*dest, *v.distances.get(dest).unwrap()));
+                }
+                destinations.push(ds);
+            }
+        }
+
+        destinations.into_iter().unique().collect()
     }
 
-    fn wait(&mut self) {
+    fn states_from(&self, destinations: Vec<Vec<(u16, u8)>>) -> Vec<State> {
+        let mut states: Vec<State> = Vec::new();
+        for ds in &destinations {
+            let mut s = self.clone();
+            s.destinations.extend(ds);
+            states.push(s);
+        }
+        states
+    }
+
+    fn spawn_possible_states(&self, current_positions: Vec<u16>, valves: &Valves) -> Vec<State> {
+        self.states_from(self.valid_destinations(current_positions, valves))
+    }
+
+    fn tick(&mut self, valves: &Valves) -> Vec<u16> {
         self.release_pressure();
-        self.elapsed_time += 1;
+
+        let mut destinations: Vec<(u16, u8)> = Vec::new();
+        let mut valves_opened: Vec<u16> = Vec::new();
+
+        for (valve, distance) in &self.destinations {
+            if *distance == 0 {
+                valves_opened.push(*valve);
+            } else {
+                destinations.push((*valve, distance - 1));
+            }
+        }
+
+        for valve in &valves_opened {
+            self.open_valve(*valve, valves);
+        }
+
+        self.destinations = destinations;
+        valves_opened
     }
 
     fn release_pressure(&mut self) {
-        self.pressure_released += self.open_valves.iter().map(|v| v.flow_rate).sum::<u32>();
-    }
-
-    fn can_open_valve(&self) -> bool {
-        self.closed_valves.contains(&self.current_valve)
-    }
-
-    fn valve(&self) -> &Valve {
-        self.valves.get(&self.current_valve).unwrap()
+        self.pressure_released += self.pressure_per_turn as u16;
     }
 }
 
-impl From<FxHashMap<String, Valve>> for State {
-    fn from(valves: FxHashMap<String, Valve>) -> Self {
-        let closed_valves = valves.clone().into_values().filter(|v| v.flow_rate > 0).map(|v| v.name).collect();
+impl From<Valves> for State {
+    fn from(valves: Valves) -> Self {
         State {
-            valves,
-            closed_valves,
-            open_valves: FxHashSet::default(),
-            current_valve: String::from("AA"),
-            last_valve: String::from(""),
+            closed_valves: valves.values().filter(|v| v.flow_rate > 0).map(|v| v.id).collect(),
+            pressure_per_turn: 0,
             pressure_released: 0,
-            all_valves_open: false,
-            elapsed_time: 0
+            destinations: Vec::new()
         }
     }
 }
@@ -83,69 +108,103 @@ fn parse_valve_name(s: &str) -> IResult<&str, &str> {
 
 fn parse_valve(s: &str) -> Valve {
     let (s, name) = preceded(tag("Valve "), parse_valve_name)(s).unwrap();
-    let (s, flow_rate) = preceded(tag(" has flow rate="), u_32)(s).unwrap();
+    let (s, flow_rate) = preceded(tag(" has flow rate="), u_8)(s).unwrap();
     let (_, leads_to) = preceded(
         alt((tag("; tunnel leads to valve "), tag("; tunnels lead to valves "))),
         separated_list1(tag(", "), parse_valve_name)
     )(s).unwrap();
-    Valve { name: String::from(name), flow_rate, leads_to: leads_to.into_iter().map(|s| String::from(s)).collect() }
+    Valve {
+        id: valve_name_to_id(name),
+        flow_rate,
+        leads_to: leads_to.into_iter().map(|s| valve_name_to_id(s)).collect(),
+        distances: IntMap::default()
+    }
 }
 
-fn take_turn(state: State) -> Vec<State> {
-    if state.all_valves_open {
-        let mut s = state.clone();
-        s.wait();
-        return vec![s];
+fn valve_name_to_id(s: &str) -> u16 {
+    let [c1, c2]: [char; 2] = s.chars().collect::<Vec<char>>().try_into().unwrap();
+    ((c1 as u16) << 8) + c2 as u16
+}
+
+fn build_distance_maps(valves: Valves) -> Valves {
+    let ends: Vec<u16> = valves.values().filter(|v| v.flow_rate > 0).map(|v| v.id).collect();
+    let mut starts = ends.clone();
+    starts.push(valve_name_to_id("AA"));
+
+    let valid_neighbors: FxHashMap<u16, Vec<u16>> = valves.values().map(|v| (v.id, v.leads_to.clone())).collect();
+
+    let mut calced: Vec<Valve> = Vec::new();
+
+    for start in starts {
+        let mut distance_map: IntMap<u16, u8> = IntMap::default();
+        for end in ends.clone() {
+            distance_map.insert(end, dijkstra_shortest(&start, &end, &valid_neighbors) as u8);
+        }
+        let mut valve = valves.get(&start).unwrap().clone();
+        valve.distances = distance_map;
+        calced.push(valve);
     }
 
-    let mut paths: Vec<State> = Vec::new();
+    calced.into_iter().map(|v| (v.id, v)).collect()
+}
 
-    if state.can_open_valve() {
-        let mut s = state.clone();
-        s.open_valve();
-        let all_valves_open = s.all_valves_open;
-        paths.push(s);
+fn do_tick(mut state: State, valves: &Valves) -> Vec<State> {
+    let valves_opened = state.tick(valves);
 
-        if all_valves_open {
-            return paths;
+    if state.closed_valves.len() == 0 || valves_opened.len() == 0 {
+        return vec![state];
+    }
+
+    state.spawn_possible_states(valves_opened, valves)
+}
+
+fn do_ticks(mut states: Vec<State>, turns: u8, valves: &Valves) -> u16 {
+    for _ in 0..turns {
+        let mut new_states: Vec<State> = Vec::new();
+
+        for state in states {
+            new_states.extend(do_tick(state, valves));
+        }
+
+        let leader: i16 = new_states.iter().map(|s| s.pressure_released).max().unwrap() as i16;
+        // arbitrarily reduce the number of paths to consider
+        // this works for all tests/inputs I tried, but there must be a better way
+        states = new_states.into_iter().filter(|s| s.pressure_released as i16 > leader - 100).collect();
+    }
+
+    states.into_iter().map(|s| s.pressure_released).max().unwrap()
+}
+
+fn add_elephant(states: &Vec<State>) -> Vec<State> {
+    let mut ret: Vec<State> = Vec::new();
+    let destinations: Vec<(u16, u8)> = states.iter().map(|s| s.destinations[0].clone()).collect();
+
+    for state in states {
+        for destination in destinations.clone() {
+            if state.destinations[0] != destination {
+                let mut s = state.clone();
+                s.destinations.push(destination);
+                ret.push(s);
+            }
         }
     }
 
-    for tunnel in state.valve().leads_to.clone() {
-        if tunnel != state.last_valve {
-            let mut s = state.clone();
-            s.move_to(tunnel);
-            paths.push(s);
-        }
-    }
-
-    paths
-}
-
-fn take_turns(state: State) -> Vec<State> {
-    let mut states = vec![state];
-
-    for n in 0..30 {
-        states = states
-            .into_iter()
-            .flat_map(|s| take_turn(s))
-            .filter(|s| s.open_valves.len() >= n / 4 || s.closed_valves.is_empty())
-            .collect();
-    }
-
-    states
+    ret
 }
 
 pub fn solve(input: &str) -> (Box<dyn Display>, Box<dyn Display>) {
-    let valves: FxHashMap<String, Valve> = input
+    let mut valves: IntMap<u16, Valve> = input
         .lines()
         .map(|s| {
             let valve = parse_valve(s);
-            (valve.name.clone(), valve)
+            (valve.id, valve)
         })
         .collect();
+    valves = build_distance_maps(valves);
 
-    let part1 = take_turns(State::from(valves)).iter().map(|s| s.pressure_released).max().unwrap();
+    let state = State::from(valves.clone());
+    let states = state.spawn_possible_states(vec![valve_name_to_id("AA")], &valves);
+    let states_w_elephant = add_elephant(&states);
 
-    (Box::new(part1), Box::new(0))
+    (Box::new(do_ticks(states, 30, &valves)), Box::new(do_ticks(states_w_elephant, 26, &valves)))
 }
