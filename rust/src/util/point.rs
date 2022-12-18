@@ -118,3 +118,33 @@ impl FromStr for Point {
         })
     }
 }
+
+#[allow(dead_code)]
+pub fn pretty_print(ps: &Vec<Point>) -> String {
+    let xs: Vec<i32> = ps.iter().map(|p| p.x).collect();
+    let ys: Vec<i32> = ps.iter().map(|p| p.y).collect();
+    let min_x = xs.clone().into_iter().min().unwrap();
+    let max_x = xs.into_iter().max().unwrap();
+    let min_y = ys.clone().into_iter().min().unwrap();
+    let max_y = ys.into_iter().max().unwrap();
+
+    let mut ret: Vec<char> = (min_y..max_y + 1)
+        .flat_map(|y| {
+            let mut vs: Vec<char> = Vec::new();
+            vs.push('\n');
+            vs.extend(y.to_string().chars().rev());
+            vs.push(' ');
+            vs.extend((min_x..max_x + 1)
+                .map(|x| if ps.contains(&Point { x, y }) { '#' } else { ' ' })
+                .rev()
+                .collect::<Vec<char>>());
+            vs
+        })
+        .rev()
+        .collect();
+    let v_min_x: Vec<char> = min_x.to_string().chars().collect();
+    ret.extend(v_min_x.clone());
+    ret.extend(" ".repeat((max_x - min_x).abs() as usize - v_min_x.len()).chars());
+    ret.extend(max_x.to_string().chars());
+    ret.iter().collect()
+}
