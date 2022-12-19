@@ -1,3 +1,4 @@
+pub mod bits;
 pub mod dijkstra;
 pub mod grid;
 pub mod nom;
