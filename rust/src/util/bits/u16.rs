@@ -1,5 +1,10 @@
+#[allow(dead_code)]
 pub fn is_bit_set(bytes: u16, n: u8) -> bool {
     0 != bytes & (1 << n)
+}
+
+pub fn is_bit_unset(bytes: u16, n: u8) -> bool {
+    0 == bytes & (1 << n)
 }
 
 pub fn set_bit(mut bytes: u16, n: u8) -> u16 {
@@ -25,5 +30,5 @@ pub fn is_even(n: u16) -> bool {
 }
 
 pub fn unset_bits<'a>(bytes: &'a u16) -> impl Iterator<Item=u8> + 'a {
-    (0..16).filter(|n| !is_bit_set(*bytes, *n))
+    (0..16).filter(|n| is_bit_unset(*bytes, *n))
 }
