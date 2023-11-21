@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+set -e
+
+BASE_DIR="$(dirname "$0")"
+
+function show_help() {
+  printf 'solve.sh DAY [YEAR] [INPUT]\n'
+  printf '    DAY - problem day\n'
+  printf '    YEAR - problem year, defaults to current year in December, previous year otherwise\n'
+  printf '    INPUT - problem input, defaults to input/YEAR/DAY\n\n'
+  printf '    If the input does not exist, an attempt to retrieve the input from adventofcode.com is made\n'
+  exit 1
+}
+
+function show_cookie_help() {
+  printf 'session key must be provided to retrieve input from adventofcode.com\n\n'
+  printf '  instructions:\n'
+  printf "    view the network request for a puzzle's input\n"
+  printf '    copy the session value from the cookie request header\n'
+  printf '    paste the copied value to %s\n' "$BASE_DIR/session"
+  exit 2
+}
+
+function get_latest_year() {
+  local _year
+  _year="$(date +%Y)"
+  if [ "$(date +%m)" -eq 12 ] ; then
+    printf '%s' "$_year"
+  else
+    printf '%s' "$((_year - 1))"
+  fi
+}
+
+function download_input() {
+  local _file
+  local _year
+  local _day
+  _file="$1"
+  _year="$2"
+  _day="$3"
+  if ! [ -f "$_file" ] ; then
+    local _cookie
+    _cookie="$BASE_DIR/session"
+    [ -f "$_cookie" ] || show_cookie_help
+    curl https://adventofcode.com/"$_year"/day/"$_day"/input \
+      --fail \
+      --create-dirs --output "$_file" \
+      -H "cookie: session=$(cat "$_cookie")"
+  fi
+}
+
+function run_solver() {
+  if [[ $4 == *"/rust/src/"* ]] ; then
+    printf 'Rust %s day %s solution - input: %s\n' "$2" "$1" "$3"
+    cargo run --manifest-path "$BASE_DIR"/rust/Cargo.toml "$1" "$2" "$3"
+  elif [[ $4 == *"/haskell/src/"* ]] ; then
+    printf 'Haskell %s day %s solution - input: %s\n' "$2" "$1" "$3"
+    local _input_file
+    _input_file="$(readlink -f "$3")"
+    cd "$BASE_DIR"/haskell
+    cabal run aoc -- "$1" "$2" "$_input_file"
+    cd - > /dev/null
+  fi
+}
+
+day="$1"
+year="${2:-$(get_latest_year)}"
+input_file="${3:-$(printf '%s/input/%s/%s' "$BASE_DIR" "$year" "$day")}"
+
+[ -n "$day" ] || show_help
+download_input "$input_file" "$year" "$day"
+[ -f "$input_file" ] || (echo "$input_file does not exist" && exit 3)
+
+find . -wholename "*$year/[dD]ay$day.*" -print0 | while IFS= read -r -d '' solver; do
+  run_solver "$day" "$year" "$input_file" "$solver"
+  printf '\n'
+done

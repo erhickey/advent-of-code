@@ -1,4 +1,6 @@
-cookie
+session
+input/
+
 flamegraph.svg
 *.input
 *.test*

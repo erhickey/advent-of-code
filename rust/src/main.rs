@@ -2,36 +2,16 @@ mod util;
 mod y2015;
 mod y2022;
 
-use std::io::Write;
 use std::time::Instant;
 use std::{env, fs, fmt::Display};
-use std::path::Path;
-
-use curl::easy::{Easy, List};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let day: u8 = args[1].parse().unwrap();
+    let year: u16 = args[2].parse().unwrap();
+    let input_file = &args[3];
 
-    let day: u8;
-    let mut year: u16 = get_latest_year();
-    let mut input_file: Option<&str> = None;
-
-    if args.len() == 4 {
-        day = args[1].parse().unwrap();
-        year = args[2].parse().unwrap();
-        input_file = Some(&args[3]);
-    } else if args.len() == 3 {
-        day = args[1].parse().unwrap();
-        year = args[2].parse().unwrap();
-    } else {
-        day = args[1].parse().unwrap();
-    }
-
-    let input = match input_file {
-        Some(s) => fs::read_to_string(s).expect(&*format!("cannot find input file: {}", s)),
-        _ => get_input(year, day),
-    };
-
+    let input = fs::read_to_string(input_file).expect(&*format!("cannot find input file: {}", input_file));
     let solver = get_solver(year, day);
     let now = Instant::now();
     let (part1, part2) = solver(&input);
@@ -82,46 +62,4 @@ fn get_solver(year: u16, day: u8) -> fn(&str) -> (Box<dyn Display>, Box<dyn Disp
         },
         _ => unimplemented!(),
     }
-}
-
-fn get_latest_year() -> u16 {
-    // TODO: return last year, or current year if month is December
-    2022
-}
-
-fn get_input(year: u16, day: u8) -> String {
-    let input_filename = format!("day{}.input", day);
-
-    if !Path::new(&input_filename).exists() {
-        println!("{} does not exist, attempting retrieval", &input_filename);
-
-        let cookie = fs::read_to_string("cookie")
-            .expect("cookie not found. Create a file named cookie, containing the value of the session cookie");
-        let url = format!("https://adventofcode.com/{}/day/{}/input", year, day);
-        let mut list = List::new();
-        list.append("content-type: text/plain").unwrap();
-
-        let mut easy = Easy::new();
-        easy.url(&url).unwrap();
-        easy.http_version(curl::easy::HttpVersion::V11).unwrap();
-        easy.http_headers(list).unwrap();
-        easy.cookie(&*format!("session={}", &cookie)).unwrap();
-
-        fs::File::create(&input_filename).expect(&*format!("error creating file: {}", &input_filename));
-        let mut file = fs::OpenOptions::new()
-            .write(true)
-            .append(true)
-            .open(&input_filename)
-            .expect(&*format!("error opening file: {}", &input_filename));
-
-        let mut transfer = easy.transfer();
-        transfer.write_function(|data| {
-            file.write_all(data).expect(&*format!("error writing data to input file: {}", &input_filename));
-            Ok(data.len())
-        }).unwrap();
-
-        transfer.perform().unwrap();
-    }
-
-    fs::read_to_string(&input_filename).expect(&format!("error reading {}", &input_filename))
 }

@@ -14,7 +14,7 @@ impl Shape {
     pub fn move_up(&mut self) {
         self.min_y += 1;
         self.max_y += 1;
-        for mut point in &mut self.points {
+        for point in &mut self.points {
             point.y += 1;
         }
     }
@@ -22,7 +22,7 @@ impl Shape {
     pub fn move_down(&mut self) {
         self.min_y -= 1;
         self.max_y -= 1;
-        for mut point in &mut self.points {
+        for point in &mut self.points {
             point.y -= 1;
         }
     }
@@ -30,7 +30,7 @@ impl Shape {
     pub fn move_left(&mut self) {
         self.min_x -= 1;
         self.max_x -= 1;
-        for mut point in &mut self.points {
+        for point in &mut self.points {
             point.x -= 1;
         }
     }
@@ -38,7 +38,7 @@ impl Shape {
     pub fn move_right(&mut self) {
         self.min_x += 1;
         self.max_x += 1;
-        for mut point in &mut self.points {
+        for point in &mut self.points {
             point.x += 1;
         }
     }

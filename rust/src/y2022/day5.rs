@@ -6,7 +6,7 @@ type Stacks = HashMap<u8, Vec<char>>;
 type Move = [u8; 3];
 
 fn parse_stacks(s: &str) -> Stacks {
-    let lines: Vec<Vec<char>> = s.clone()
+    let lines: Vec<Vec<char>> = s
         .lines()
         .rev()
         .map(|s| s.chars().collect())
