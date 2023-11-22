@@ -11,3 +11,6 @@ flamegraph.svg
 
 haskell/dist-newstyle
 rust/target
+clojure/.cpcache
+clojure/.clj-kondo
+clojure/.lsp

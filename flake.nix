@@ -20,15 +20,9 @@
         devShells.default = mkShell {
           buildInputs = [
             cabal-install
+            clojure
+            clojure-lsp
             haskell-language-server
-            # haskellPackages.array
-            # haskellPackages.attoparsec
-            # haskellPackages.containers
-            # haskellPackages.pqueue
-            # haskellPackages.split
-            # haskellPackages.text
-            # haskellPackages.Unique
-            # haskellPackages.vector
             pkg-config
             rust-bin.stable.latest.default
             rust-analyzer

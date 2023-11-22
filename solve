@@ -2,7 +2,7 @@
 
 set -e
 
-BASE_DIR="$(dirname "$0")"
+BASE_DIR="$(readlink -f "$(dirname "$0")")"
 
 function show_help() {
   printf 'solve.sh DAY [YEAR] [INPUT]\n'
@@ -56,10 +56,13 @@ function run_solver() {
     cargo run --manifest-path "$BASE_DIR"/rust/Cargo.toml "$1" "$2" "$3"
   elif [[ $4 == *"/haskell/src/"* ]] ; then
     printf 'Haskell %s day %s solution - input: %s\n' "$2" "$1" "$3"
-    local _input_file
-    _input_file="$(readlink -f "$3")"
     cd "$BASE_DIR"/haskell
-    cabal run aoc -- "$1" "$2" "$_input_file"
+    cabal run aoc -- "$1" "$2" "$3"
+    cd - > /dev/null
+  elif [[ $4 == *"/clojure/src/"* ]] ; then
+    printf 'Clojure %s day %s solution - input: %s\n' "$2" "$1" "$3"
+    cd "$BASE_DIR"/clojure
+    clojure -M:solve "$1" "$2" "$3"
     cd - > /dev/null
   fi
 }
