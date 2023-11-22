@@ -59,14 +59,9 @@ maxSum ss sat@(mx, my, _) = foldl' go (0,0,0,0) [(x, y, s) | s <- ss, x <- [1..m
           | otherwise = acc
           where size = fromMaybe 0 $ squareSum (x, y) s sat
 
-main = do
-  args <- getArgs
-  let sat = createSAT . createGrid 300 300 . read $ head args
-  print . (++) "Part 1: " . show $ maxSum [3] sat
-  print . (++) "Part 2: " . show $ maxSum [1..300] sat
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    sat = createSAT . createGrid 300 300 . read $ input
+    part1 = show $ maxSum [3] sat
+    part2 = show $ maxSum [1..300] sat

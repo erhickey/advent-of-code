@@ -12,7 +12,7 @@ data Coord =
 parse :: [String] -> Set Coord
 parse = S.fromList . catMaybes . concat . zipWith parseLine [0..]
   where
-    parseLine y xs = zipWith (parseChar y) [0..] xs
+    parseLine y = zipWith (parseChar y) [0..]
     parseChar y x '#' = pure $ ThreeD (x, y, 0)
     parseChar _ _ '.' = Nothing
 
@@ -49,13 +49,9 @@ doCycle s = S.fromList . mapMaybe go . S.toList $ allNeighbors s
       | S.member c s = if staysActive c s then pure c else Nothing
       | otherwise = if becomesActive c s then pure c else Nothing
 
-main = do
-  input <- parse . lines <$> readFile "day17.test"
-  print . (++) "Part 1: " . show . length $ iterate doCycle input !! 6
-  print . (++) "Part 2: " . show . length $ iterate doCycle (S.map addDimension input) !! 6
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    cs = parse $ lines input
+    part1 = show . length $ iterate doCycle cs !! 6
+    part2 = show . length $ iterate doCycle (S.map addDimension cs) !! 6

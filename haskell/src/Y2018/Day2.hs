@@ -15,15 +15,11 @@ tailMap :: (a -> a -> b) -> [a] -> [b]
 tailMap _ [] = []
 tailMap f (x:xs) = map (f x) xs ++ tailMap f xs
 
-main = do
-  input <- lines <$> readFile "day2.input"
-  let doubles = length . filter (==True) $ map (hasRepeat 2) input
-      triples = length . filter (==True) $ map (hasRepeat 3) input
-  print . (++) "Part 1: " . show $ doubles * triples
-  print . (++) "Part 2: " . head . dropWhile ((25 /=) . length) . tailMap rdiff $ input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ls = lines input
+    doubles = length . filter (==True) $ map (hasRepeat 2) ls
+    triples = length . filter (==True) $ map (hasRepeat 3) ls
+    part1 = show $ doubles * triples
+    part2 = head . dropWhile ((25 /=) . length) . tailMap rdiff $ ls

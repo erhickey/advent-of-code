@@ -37,13 +37,9 @@ basin g c = snd . head . dropWhile (not . null . fst) $ iterate go ([c], [c])
 basins :: Grid -> [[Coord]]
 basins g = map (basin g) $ lowPoints g
 
-main = do
-  input <- parse . lines <$> readFile "day9.input"
-  print . (++) "Part 1: " . show . sum . map ((+1) . (!) input) $ lowPoints input
-  print . (++) "Part 2: " . show . product . take 3 . reverse . sort . map length $ basins input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    grid = parse $ lines input
+    part1 = show . sum . map ((+1) . (!) grid) $ lowPoints grid
+    part2 = show . product . take 3 . reverse . sort . map length $ basins grid

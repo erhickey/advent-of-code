@@ -41,14 +41,10 @@ intersectionSteps xs ys = S.findMin $ S.map go is
   where is = S.intersection (S.fromList xs) (S.fromList ys)
         go x = (+2) <$> liftA2 (+) (elemIndex x xs) (elemIndex x ys)
 
-main = do
-  wires <- map (map parse . splitOn ",") . lines <$> readFile "day3.input"
-  let (w1:w2:_) = map coords wires
-  print . (++) "Part 1: " . show $ intersectionDistance w1 w2
-  print . (++) "Part 2: " . show $ intersectionSteps w1 w2
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    wires = map (map parse . splitOn ",") $ lines input
+    (w1:w2:_) = map coords wires
+    part1 = show $ intersectionDistance w1 w2
+    part2 = show $ intersectionSteps w1 w2

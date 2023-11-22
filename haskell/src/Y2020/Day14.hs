@@ -62,13 +62,9 @@ version2 :: Mask -> IntMap Int -> Value -> IntMap Int
 version2 ms m (k, v) = foldl go m $ v2Mask ms k
   where go acc x = M.insert x v acc
 
-main = do
-  input <- parse . lines <$> readFile "day14.input"
-  print . (++) "Part 1: " . show . sum . M.elems $ initialize version1 input
-  print . (++) "Part 2: " . show . sum . M.elems $ initialize version2 input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    program = parse $ lines input
+    part1 = show . sum . M.elems $ initialize version1 program
+    part2 = show . sum . M.elems $ initialize version2 program

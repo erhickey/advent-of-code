@@ -26,13 +26,9 @@ stripInvalid = foldl go []
           | valid x = x:acc
           | otherwise = acc
 
-main = do
-  ps <- map (parsePassport . words) . splitOn "\n\n" <$> readFile "day4.input"
-  print . (++) "Part 1: " . show . length $ filter isValid ps
-  print . (++) "Part 2: " . show . length . filter isValid $ map stripInvalid ps
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ps = map (parsePassport . words) $ splitOn "\n\n" input
+    part1 = show . length $ filter isValid ps
+    part2 = show . length . filter isValid $ map stripInvalid ps

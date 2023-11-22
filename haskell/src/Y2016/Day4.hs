@@ -30,13 +30,9 @@ rotate 0 c = c
 rotate n 'z' = rotate (n - 1) 'a'
 rotate n c = rotate (n - 1) $ succ c
 
-main = do
-  validRooms <- filter isValid . map parseLine . lines <$> readFile "day4.input"
-  print . (++) "Part 1: " . show . sum . map sectorId $ validRooms
-  print . (++) "Part 2: " . show . filter (("north" `isInfixOf`) . snd) . zip (map sectorId validRooms) . map decrypt $ validRooms
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    validRooms = filter isValid . map parseLine $ lines input
+    part1 = show . sum . map sectorId $ validRooms
+    part2 = show . filter (("north" `isInfixOf`) . snd) . zip (map sectorId validRooms) . map decrypt $ validRooms

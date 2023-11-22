@@ -34,19 +34,13 @@ endMatches xs s = go s $ reverse xs
 dropLast :: Seq a -> Seq a
 dropLast s = let (x :> _) = S.viewr s in x
 
-main = do
-  args <- getArgs
-  let input = head args
-      numRecipes = read input
-      toMatch = map (read . (:[])) input
-      recipes = map (\(_,_,rs) -> rs) $ iterate combineRecipes (0, 1, S.empty |> 3 |> 7)
-      p1 = S.drop numRecipes . head $ dropWhile ((numRecipes + 10 >) . S.length) recipes
-      p2 = fromJust . find (endMatches toMatch) $ concatMap (\s -> [s, dropLast s]) recipes
-  print . (++) "Part 1: " . concatMap show $ toList p1
-  print . (++) "Part 2: " . show $ S.length p2 - length toMatch
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    numRecipes = read input
+    toMatch = map (read . (:[])) $ filter (/= '\n') input
+    recipes = map (\(_,_,rs) -> rs) $ iterate combineRecipes (0, 1, S.empty |> 3 |> 7)
+    p1 = S.drop numRecipes . head $ dropWhile ((numRecipes + 10 >) . S.length) recipes
+    p2 = fromJust . find (endMatches toMatch) $ concatMap (\s -> [s, dropLast s]) recipes
+    part1 = concatMap show $ toList p1
+    part2 = show $ S.length p2 - length toMatch

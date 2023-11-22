@@ -19,13 +19,9 @@ parseDimensions = (\(x1:x2:x3:_) -> (x1, x2, x3)) . sort . map read . split 'x'
 split :: Char -> String -> [String]
 split delim xs = words [if c == delim then ' ' else c | c <- xs ]
 
-main = do
-  dimensions <- map parseDimensions . lines <$> readFile "day2.input"
-  print . (++) "Part 1: " . show $ (sum $ map surfaceArea dimensions) + (sum $ map slack dimensions)
-  print . (++) "Part 2: " . show . sum $ map ribbon dimensions
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    dimensions = map parseDimensions . lines $ input
+    part1 = show $ sum (map surfaceArea dimensions) + sum (map slack dimensions)
+    part2 = show . sum $ map ribbon dimensions

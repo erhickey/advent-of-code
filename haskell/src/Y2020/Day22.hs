@@ -31,12 +31,9 @@ winningDeck ds
 score :: Deck -> Int
 score = sum . zipWith (*) [1..] . reverse . toList
 
-main = do
-  decks <- bimap parseDeck parseDeck . break (=="") . lines <$> readFile "day22.input"
-  print . (++) "Part 1: " . show . score $ winningDeck decks
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
+    decks = bimap parseDeck parseDeck . break (=="") $ lines input
+    part1 = show . score $ winningDeck decks
     part2 = ""

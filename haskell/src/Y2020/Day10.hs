@@ -28,14 +28,9 @@ combinations xs = snd . head $ foldr go [] xs
       | e1c - x <= 3 = (x, e1n + e0n):acc
       | otherwise = (x, e0n):acc
 
-main = do
-  input <- map read . lines <$> readFile "day10.input"
-  let c = chain input
-  print . (++) "Part 1: " . show $ gapCount c 1 * gapCount c 3
-  print . (++) "Part 2: " . show $ combinations c
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    c = chain . map read $ lines input
+    part1 = show $ gapCount c 1 * gapCount c 3
+    part2 = show $ combinations c

@@ -68,13 +68,9 @@ moves = foldl (flip move) ((0, 0), HE)
 waypointMoves :: [Movement] -> WaypointState
 waypointMoves = foldl (flip waypointMove) ((0, 0), (10, 1))
 
-main = do
-  input <- map parse . lines <$> readFile "day12.input"
-  print . (++) "Part 1: " . show . manhattanDistance (0, 0) . fst $ moves input
-  print . (++) "Part 2: " . show . manhattanDistance (0, 0) . fst $ waypointMoves input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ms = map parse $ lines input
+    part1 = show . manhattanDistance (0, 0) . fst $ moves ms
+    part2 = show . manhattanDistance (0, 0) . fst $ waypointMoves ms

@@ -8,12 +8,9 @@ If you have any constructive criticism you are willing to share please create an
 
 ## Run Instructions
 
-Start a nix development shell, update cabal package list, then follow the instructions provided by the solve bash script.
+Start a nix development shell, then follow the instructions provided by the solve bash script. You may need to run `cabal update` to update the cabal package list.
 
 ```bash
 nix develop
-cabal update
 ./solve
 ```
-
-Note: most haskell solutions are broken after run refactor, fixes coming

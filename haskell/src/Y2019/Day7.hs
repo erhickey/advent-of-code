@@ -6,12 +6,12 @@ import Data.List.Split (splitOn)
 
 import Y2019.Intcode (runIntcode, ProgramState(..))
 
-part1 :: [Int] -> Int
-part1 xs = maximum . map (last . go) $ permutations [0..4]
+p1 :: [Int] -> Int
+p1 xs = maximum . map (last . go) $ permutations [0..4]
   where go = foldl (\input phase -> psOutput . runIntcode $ ProgramState xs (phase:input) [] 0 0) [0]
 
-part2 :: [Int] -> Int
-part2 xs = maximum . map (feedbackLoop [0] 0 . map (\n -> ProgramState xs [n] [] 0 0)) $ permutations [5..9]
+p2 :: [Int] -> Int
+p2 xs = maximum . map (feedbackLoop [0] 0 . map (\n -> ProgramState xs [n] [] 0 0)) $ permutations [5..9]
 
 feedbackLoop :: [Int] -> Int -> [ProgramState] -> Int
 feedbackLoop input n xs =
@@ -23,13 +23,9 @@ feedbackLoop input n xs =
   in  if complete newAmps then last output else feedbackLoop output (n + 1) newAmps
   where complete xs = (==) (length xs) . length . filter (== -1) $ map psIndex xs
 
-main = do
-  input <- map read . splitOn "," <$> readFile "day7.input"
-  print . (++) "Part 1: " . show $ part1 input
-  print . (++) "Part 2: " . show $ part2 input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = map read $ splitOn "," input
+    part1 = show $ p1 ns
+    part2 = show $ p2 ns

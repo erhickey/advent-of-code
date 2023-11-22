@@ -103,13 +103,9 @@ answer g = unsafeAt arr end
     arr = distances g
     (_, end) = bounds arr
 
-main = do
-  input <- parse . lines <$> readFile "day15.input"
-  print . (++) "Part 1: " . show $ answer input
-  print . (++) "Part 2: " . show . answer $ expandGrid input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    grid = parse $ lines input
+    part1 = show $ answer grid
+    part2 = show . answer $ expandGrid grid

@@ -10,16 +10,12 @@ react = foldr step ""
 
 -- produce 26 variants of the input
 -- where each variant has a different letter of the alphabet removed
-part2 :: String -> [String]
-part2 = zipWith (\c xs -> filter ((/=c) . toUpper) xs) ['A'..'Z'] . replicate 26
-
-main = do
-  input <- filter (/= '\n') <$> readFile "day5.input"
-  print . (++) "Part 1: " . show . length . react $ input
-  print . (++) "Part 2: " . show . minimum . map (length . react) $ part2 input
+p2 :: String -> [String]
+p2 = zipWith (\c xs -> filter ((/=c) . toUpper) xs) ['A'..'Z'] . replicate 26
 
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    cs = filter (/= '\n') input
+    part1 = show . length . react $ cs
+    part2 = show . minimum . map (length . react) $ p2 cs

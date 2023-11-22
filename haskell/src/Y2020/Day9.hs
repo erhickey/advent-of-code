@@ -25,14 +25,10 @@ findRange (x:y:xs) n
 minPlusMax :: (Num a, Ord a) => [a] -> a
 minPlusMax xs = minimum xs + maximum xs
 
-main = do
-  input <- map read . lines <$> readFile "day9.input"
-  let fi = firstInvalid 25 input
-  print . (++) "Part 1: " $ show fi
-  print . (++) "Part 2: " . show . minPlusMax $ findRange input fi
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = map read $ lines input
+    fi = firstInvalid 25 ns
+    part1 = show fi
+    part2 = show . minPlusMax $ findRange ns fi

@@ -47,13 +47,9 @@ prioritizeAddition = go []
     insertMatchingOpen (n, acc) (CloseParen:xs) = insertMatchingOpen (n + 1, CloseParen:acc) xs
     insertMatchingOpen (n, acc) (x:xs) = insertMatchingOpen (n, x:acc) xs
 
-main = do
-  input <- map parseLine . lines <$> readFile "day18.input"
-  print . (++) "Part 1: " . show . sum $ map evaluate input
-  print . (++) "Part 2: " . show . sum $ map (evaluate . prioritizeAddition) input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    es = map parseLine $ lines input
+    part1 = show . sum $ map evaluate es
+    part2 = show . sum $ map (evaluate . prioritizeAddition) es

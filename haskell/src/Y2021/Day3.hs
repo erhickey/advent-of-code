@@ -7,7 +7,7 @@ import Data.List (transpose)
 
 onesZeroes :: [Int] -> (Int, Int)
 onesZeroes xs = (count 1, count 0)
-  where count n = length $ filter ((==) n) xs
+  where count n = length $ filter (n ==) xs
 
 gammaEpsilon :: [[Int]] -> ([Int], [Int])
 gammaEpsilon = foldl go ([], []) . reverse
@@ -18,10 +18,10 @@ gammaEpsilon = foldl go ([], []) . reverse
 rating :: Bool -> [[Int]] -> [Int]
 rating o2 xs = head . head . filter ((==) 1 . length) $ scanl go xs [0..]
   where go ys ix =
-          let bits = map (flip (!!) ix) ys
+          let bits = map (!! ix) ys
               f = if o2 then (>=) else (<)
               oneOrZero = fromEnum . uncurry f $ onesZeroes bits
-          in filter ((==) oneOrZero . (flip (!!) ix)) ys
+          in filter ((==) oneOrZero . (!! ix)) ys
 
 binToDec :: [Int] -> Int
 binToDec = sum . zipWith (*) (iterate (*2) 1) . reverse
@@ -29,13 +29,9 @@ binToDec = sum . zipWith (*) (iterate (*2) 1) . reverse
 answer :: ([Int], [Int]) -> Int
 answer = uncurry (*) . join bimap binToDec
 
-main = do
-   input <- map (map digitToInt) . lines <$> readFile "day3.input"
-   print . (++) "Part 1: " . show . answer . gammaEpsilon $ transpose input
-   print . (++) "Part 2: " . show . answer $ (rating True input, rating False input)
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = map (map digitToInt) $ lines input
+    part1 = show . answer . gammaEpsilon $ transpose ns
+    part2 = show . answer $ (rating True ns, rating False ns)

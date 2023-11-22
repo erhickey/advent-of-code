@@ -31,13 +31,9 @@ findValues xs = fst $ foldl go (IM.empty, xs) [1,4,7,8,9,6,0,3,5,2]
     find 8 _ = head . ofLength 7
     find 9 m = head . filter (isSubset (m ! 4)) . ofLength 6
 
-main = do
-  input <- map (lineOutput . parseLine) . lines <$> readFile "day8.input"
-  print . (++) "Part 1: " . show . length $ concatMap (filter (`elem` [1,4,7,8])) input
-  print . (++) "Part 2: " . show . sum $ map (read . concatMap show) input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ss = map (lineOutput . parseLine) $ lines input
+    part1 = show . length $ concatMap (filter (`elem` [1,4,7,8])) ss
+    part2 = show . sum $ map (read . concatMap show) ss

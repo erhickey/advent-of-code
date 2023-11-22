@@ -19,15 +19,8 @@ valid (x, y, z)
   | y + z <= x = False
   | otherwise = True
 
-main = do
-  input <- lines <$> readFile "day3.input"
-  let part1 = filter valid $ map parseTriangle input
-      part2 = filter valid $ parseTriangles input
-  print . (++) "Part 1: " . show $ length part1
-  print . (++) "Part 2: " . show $ length part2
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    part1 = show . length . filter valid . map parseTriangle . lines $ input
+    part2 = show . length . filter valid $ parseTriangles . lines $ input

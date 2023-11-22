@@ -7,16 +7,12 @@ import Y2019.Intcode (runIntcodeEasy)
 modIntcode :: [Int] -> Int -> Int -> [Int]
 modIntcode (x:_:_:xs) n v = x:n:v:xs
 
-part2 :: [Int] -> Int -> Int
-part2 xs patt = head [ 100 * x + y | x <- [0..99], y <- [0..99], head (runIntcodeEasy $ modIntcode xs x y) == patt ]
-
-main = do
-  input <- map read . splitOn "," <$> readFile "day2.input"
-  print . (++) "Part 1: " . show . head . runIntcodeEasy $ modIntcode input 12 2
-  print . (++) "Part 2: " . show $ part2 input 19690720
+p2 :: [Int] -> Int -> Int
+p2 xs patt = head [ 100 * x + y | x <- [0..99], y <- [0..99], head (runIntcodeEasy $ modIntcode xs x y) == patt ]
 
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = map read $ splitOn "," input
+    part1 = show . head . runIntcodeEasy $ modIntcode ns 12 2
+    part2 = show $ p2 ns 19690720

@@ -132,8 +132,8 @@ numMonsters xs = S.foldl findMonster 0 sea
     findMonster acc n = if S.isSubsetOf monster sea then acc + 1 else acc
       where monster = S.union (S.map (+(n+monsterMargin)) $ fst seaMonster) (S.map (+(n+monsterMargin+monsterMargin)) $ snd seaMonster)
 
-part2 :: IntMap [Tile] -> Int
-part2 tm = numWaves - monsters * 15
+p2 :: IntMap [Tile] -> Int
+p2 tm = numWaves - monsters * 15
   where
     (Just p) = solvePuzzle tm
     puzzle = assemblePuzzle p
@@ -141,13 +141,9 @@ part2 tm = numWaves - monsters * 15
     monsters = maximum $ map numMonsters ps
     numWaves = length . filter (=='#') $ concat puzzle
 
-main = do
-  input <- IM.unions . map (parse . lines) . filter (not . null) . splitOn "\n\n" <$> readFile "day20.input"
-  print . (++) "Part 1: " . show . product . S.toList $ uniqueTiles [topEdge, leftEdge] input
-  print . (++) "Part 2: " . show $ part2 input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    es = IM.unions . map (parse . lines) . filter (not . null) $ splitOn "\n\n" input
+    part1 = show . product . S.toList $ uniqueTiles [topEdge, leftEdge] es
+    part2 = show $ p2 es

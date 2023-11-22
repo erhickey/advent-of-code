@@ -60,21 +60,17 @@ modded sq = Sq.foldlWithIndex swap [] sq
         swap acc ix (Nop, n) = Sq.update ix (Jmp, n) sq : acc
         swap acc ix (Jmp, n) = Sq.update ix (Nop, n) sq : acc
 
-part2 :: Seq Instruction -> State
-part2 = go . modded
+p2 :: Seq Instruction -> State
+p2 = go . modded
   where
     go (s:ss)
       | not . incomplete $ run = run
       | otherwise = go ss
       where run = runNext $ runWhile (\x -> incomplete x && newInstruction x) s
 
-main = do
-  xs <- Sq.fromList . map parseLine . lines <$> readFile "day8.input"
-  print . (++) "Part 1: " . show . accumulator $ runWhile newInstruction xs
-  print . (++) "Part 2: " . show . accumulator $ part2 xs
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    xs = Sq.fromList . map parseLine $ lines input
+    part1 = show . accumulator $ runWhile newInstruction xs
+    part2 = show . accumulator $ p2 xs

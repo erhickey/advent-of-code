@@ -328,8 +328,8 @@ outcome bs = battleDuration * (sum . map hp $ units e)
 -- very lazy solution for this part
 -- could at least try to determine a better starting point than 4
 -- but I'm sick of this problem
-part2 :: BattleState -> Int
-part2 bs = outcome . fixElves bs . power . head . getFaction E $ units domination
+p2 :: BattleState -> Int
+p2 bs = outcome . fixElves bs . power . head . getFaction E $ units domination
   where elfCount = length . getFaction E . units
         originalElfCount = elfCount bs
         doBattle = head . dropWhile (not . battleComplete . units) . iterate doRound
@@ -340,13 +340,9 @@ part2 bs = outcome . fixElves bs . power . head . getFaction E $ units dominatio
           | faction u == E = setPower n u
           | otherwise = u
 
-main = do
-  bs <- parseBattle . lines <$> readFile "day15.input"
-  print . (++) "Part 1: " . show $ outcome bs
-  print . (++) "Part 2: " . show $ part2 bs
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    bs = parseBattle $ lines input
+    part1 = show $ outcome bs
+    part2 = show $ p2 bs

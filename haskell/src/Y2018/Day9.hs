@@ -29,19 +29,20 @@ doTurn gs t = GameState
         player = t `mod` maxPlayers gs
         cScores = M.insertWith (+) player score (scores gs)
 
-main = do
-  args <- getArgs
-  let gs = GameState
-        { maxPlayers = read $ head args
-        , marbles = S.singleton 0
-        , scores = M.empty
-        }
-      maxTurns = read $ args !! 1
-      results = foldl' doTurn gs [1..maxTurns]
-  print . (++) "High Score: " . show . maximum . M.elems $ scores results
+parseInput :: String -> (Int, Int)
+parseInput input = (read players, read turns)
+  where [players, _, _, _, _, _, turns, _] = words input
 
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    (players, maxTurns) = parseInput input
+    gs = GameState
+        { maxPlayers = players
+        , marbles = S.singleton 0
+        , scores = M.empty
+        }
+    p1Results = foldl' doTurn gs [1..maxTurns]
+    p2Results = foldl' doTurn gs [1..(maxTurns * 100)]
+    part1 = show . maximum . M.elems $ scores p1Results
+    part2 = show . maximum . M.elems $ scores p2Results

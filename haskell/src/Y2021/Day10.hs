@@ -3,8 +3,8 @@ module Y2021.Day10 (solve) where
 import Control.Applicative ((<|>), liftA2)
 import Data.Either (rights)
 import Data.List (sort)
-import qualified Data.Text as T (lines)
-import qualified Data.Text.IO as T (readFile)
+import qualified Data.Text as T (lines, pack)
+
 import Data.Attoparsec.Text (char, endOfInput, many', parseOnly, Parser)
 
 data Chunk = Chunk { open :: Char, close :: Char, children :: [Chunk] }
@@ -64,13 +64,9 @@ middle :: [a] -> a
 middle xs = xs !! index
   where index = length xs `div` 2
 
-main = do
-  input <- rights . map (parseOnly chunksParser) . T.lines <$> T.readFile "day10.input"
-  print . (++) "Part 1: " . show . scoreErrors . map (head . corruptedClosers) $ filter corruptedLine input
-  print . (++) "Part 2: " . show . middle . sort . map (scoreFixes . completeLine) $ filter (not . corruptedLine) input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    cs = rights . map (parseOnly chunksParser) . T.lines $ T.pack input
+    part1 = show . scoreErrors . map (head . corruptedClosers) $ filter corruptedLine cs
+    part2 = show . middle . sort . map (scoreFixes . completeLine) $ filter (not . corruptedLine) cs

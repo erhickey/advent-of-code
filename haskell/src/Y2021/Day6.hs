@@ -7,13 +7,9 @@ initialize :: [Int] -> [Int]
 initialize xs = map go [0..8]
   where go n = length $ filter (==n) xs
 
-main = do
-  input <- initialize . read . (\s -> "[" ++ s ++ "]") <$> readFile "day6.input"
-  print . (++) "Part 1: " . show . sum $ iterate passDay input !! 80
-  print . (++) "Part 2: " . show . sum $ iterate passDay input !! 256
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = initialize . read . (\s -> "[" ++ s ++ "]") $ input
+    part1 = show . sum $ iterate passDay ns !! 80
+    part2 = show . sum $ iterate passDay ns !! 256

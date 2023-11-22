@@ -45,21 +45,17 @@ buildAreaMap g xs = foldl go M.empty $ points g
                 shortest = minimum $ map snd ds
                 ds = map (second $ manhattanDistance p) ls
 
-part2 :: Grid -> [Point] -> Int
-part2 g xs = length . filter safeDistance $ points g
+p2 :: Grid -> [Point] -> Int
+p2 g xs = length . filter safeDistance $ points g
   where safeDistance p = (>) 10000 . sum . map (manhattanDistance p) $ xs
-
-main = do
-  coords <- map parseLine . lines <$> readFile "day6.input"
-  let grid = initGrid coords
-      areaMap = buildAreaMap grid coords
-      p1Candidates = M.elems $ M.filter (isFiniteArea grid) areaMap
-      smallestArea = length $ maximumBy (comparing length) p1Candidates
-  print . (++) "Part 1: " . show $ smallestArea
-  print . (++) "Part 2: " . show $ part2 grid coords
 
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    coords = map parseLine $ lines input
+    grid = initGrid coords
+    areaMap = buildAreaMap grid coords
+    p1Candidates = M.elems $ M.filter (isFiniteArea grid) areaMap
+    smallestArea = length $ maximumBy (comparing length) p1Candidates
+    part1 = show smallestArea
+    part2 = show $ p2 grid coords

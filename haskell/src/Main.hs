@@ -83,15 +83,15 @@ main = do
   [day, year, inputFile] <- getArgs
   input <- readFile inputFile
   let s = solver (read day) (read year)
-  start <- getCurrentTime
   let (part1, part2) = s input
-  end <- getCurrentTime
   printf "\n%s day %s\n" year day
   putStrLn "---------------------------"
-  printf "run time: %ss\n" (show . nominalDiffTimeToSeconds $ diffUTCTime end start)
-  putStrLn "---------------------------"
+  start <- getCurrentTime
   printf "part 1: %s\n" part1
   printf "part 2: %s\n" part2
+  end <- getCurrentTime
+  putStrLn "---------------------------"
+  printf "run time: %ss\n" (show . nominalDiffTimeToSeconds $ diffUTCTime end start)
 
 solver :: Int -> Int -> (String -> (String, String))
 solver 1 2015 = Y2015_1.solve

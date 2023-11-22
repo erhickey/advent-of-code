@@ -19,14 +19,10 @@ parseLine = toClaim . map read . filter (all isNumber) . groupBy ((==) `on` isNu
 removeUniques :: Ord a => [a] -> [a]
 removeUniques = concat . filter ((>1) . length) . group . sort
 
-main = do
-  claims <- map parseLine . lines <$> readFile "day3.input"
-  let uniqueDupes = foldl (flip insert) empty . removeUniques . concatMap coords $ claims
-  print . (++) "Part 1: " . show . size $ uniqueDupes
-  print $ (++) "Part 2: " . show . cid <$> find (all (`notMember` uniqueDupes) . coords) claims
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    claims = map parseLine $ lines input
+    uniqueDupes = foldl (flip insert) empty . removeUniques . concatMap coords $ claims
+    part1 = show . size $ uniqueDupes
+    (Just part2) = show . cid <$> find (all (`notMember` uniqueDupes) . coords) claims

@@ -1,6 +1,7 @@
+{-# LANGUAGE TupleSections #-}
+
 module Y2016.Day1 (solve) where
 
-{-# LANGUAGE TupleSections #-}
 data Direction = R | L
 
 data Heading = N | E | S | W deriving (Enum)
@@ -45,7 +46,7 @@ taxicabDistance (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
 -- the binary operator is passed the last element from the previous result
 flatScanL :: (b -> a -> [b]) -> [b] -> [a] -> [b]
 flatScanL f acc = concat . scanl go acc
-  where go xs x = f (last xs) x
+  where go xs = f (last xs)
 
 -- find first duplciate element in a list
 firstDupe :: Eq a => [a] -> a
@@ -53,15 +54,11 @@ firstDupe (x:xs)
   | x `elem` xs = x
   | otherwise = firstDupe xs
 
-main = do
-  path <- followInstructions . map parseInstruction . words . filter (/= ',') <$> readFile "day1.input"
-  let hq = snd $ last path
-      fr = firstDupe $ map snd path
-  print . (++) "Part 1: " . show $ taxicabDistance origin hq
-  print . (++) "Part 2: " . show $ taxicabDistance origin fr
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    path = followInstructions . map parseInstruction . words . filter (/= ',') $ input
+    hq = snd $ last path
+    fr = firstDupe $ map snd path
+    part1 = show $ taxicabDistance origin hq
+    part2 = show $ taxicabDistance origin fr

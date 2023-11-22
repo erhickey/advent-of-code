@@ -40,13 +40,9 @@ flashes = go S.empty
 flashed :: Grid -> Int
 flashed = M.size . M.filter (==0)
 
-main = do
-  input <- parse . lines <$> readFile "day11.input"
-  print . (++) "Part 1: " . show . sum . map flashed . drop 1 . take 101 $ iterate tick input
-  print . (++) "Part 2: " . show . length . takeWhile (\g -> flashed g /= M.size g) $ iterate tick input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    grid = parse $ lines input
+    part1 = show . sum . map flashed . drop 1 . take 101 $ iterate tick grid
+    part2 = show . length . takeWhile (\g -> flashed g /= M.size g) $ iterate tick grid

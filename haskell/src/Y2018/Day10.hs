@@ -33,14 +33,10 @@ display s =
       ys = S.map (\(Light (_, y) _) -> y) s
   in [[ if S.member (Light (x, y) (0, 0)) s then '#' else ' ' | x <- [minimum xs..maximum xs]] | y <- [minimum ys..maximum ys]]
 
-main = do
-  input <- S.fromList . map parse . lines <$> readFile "day10.input"
-  let (dur, msg) = break containsMessage $ map (\n -> S.map (move n) input) [0..]
-  mapM_ putStrLn . display . head $ msg
-  print . (++) "Part 2: " . show $ length dur
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ls = S.fromList . map parse . lines $ input
+    (dur, msg) = break containsMessage $ map (\n -> S.map (move n) ls) [0..]
+    part1 = ("\n" ++) . unlines . display . head $ msg
+    part2 = show $ length dur

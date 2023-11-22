@@ -7,13 +7,9 @@ solver f xs = minimum $ map go [minimum xs..maximum xs]
 summation :: Int -> Int
 summation n = n * (n + 1) `div` 2
 
-main = do
-  input <- read . (\s -> "[" ++ s ++ "]") <$> readFile "day7.input"
-  print . (++) "Part 1: " . show $ solver id input
-  print . (++) "Part 2: " . show $ solver summation input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = read . (\s -> "[" ++ s ++ "]") $ input
+    part1 = show $ solver id ns
+    part2 = show $ solver summation ns

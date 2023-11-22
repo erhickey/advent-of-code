@@ -12,14 +12,14 @@ chunks n xs
 layers :: Int -> Int -> String -> [[Int]]
 layers width height s = map (map (read . (:[]))) $ chunks (width * height) s
 
-part1 :: [[Int]] -> Int
-part1 xs = length (filter (==1) layer) * length (filter (==2) layer)
+p1 :: [[Int]] -> Int
+p1 xs = length (filter (==1) layer) * length (filter (==2) layer)
   where layer = fst . minimumBy (compare `on` length . snd) $ map (\ys -> (ys, filter (==0) ys)) xs
 
 render :: [[Int]] -> [Int]
 render = foldl1 go
   where
-    go ys zs = zipWith underlay ys zs
+    go = zipWith underlay
     underlay x y
       | x /= 2 = x
       | otherwise = y
@@ -30,14 +30,9 @@ decode width xs = map (map replace) $ chunks width xs
     replace 1 = '#'
     replace 0 = ' '
 
-main = do
-  input <- layers 25 6 . filter (/='\n') <$> readFile "day8.input"
-  print . (++) "Part 1: " . show $ part1 input
-  putStrLn "Part 2:"
-  mapM_ putStrLn . decode 25 $ render input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = layers 25 6 $ filter (/='\n') input
+    part1 = show $ p1 ns
+    part2 = ("\n" ++) . unlines . decode 25 $ render ns

@@ -68,13 +68,9 @@ moveAll trackState@(_, cs) = foldl go ([], trackState) $ sort cs
                 newCarts = if crashed then foldl (flip delete) cs crashedCarts else newCart:delete cart cs
             in (if crashed then ncCoord:crashes else crashes, (tm, newCarts))
 
-main = do
-  input <- parseTrack . lines <$> readFile "day13.input"
-  print . (++) "Part 1: " . show . (\(y,x) -> (x,y)) . minimum . fst . head . dropWhile (null . fst) $ iterate (moveAll . snd) ([], input)
-  print . (++) "Part 2: " . show . (\((y,x),_,_) -> (x,y)) . head . snd . snd . head . dropWhile ((>1) . length . snd . snd) $ iterate (moveAll . snd) ([], input)
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    track = parseTrack $ lines input
+    part1 = show . (\(y,x) -> (x,y)) . minimum . fst . head . dropWhile (null . fst) $ iterate (moveAll . snd) ([], track)
+    part2 = show . (\((y,x),_,_) -> (x,y)) . head . snd . snd . head . dropWhile ((>1) . length . snd . snd) $ iterate (moveAll . snd) ([], track)

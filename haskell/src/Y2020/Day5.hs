@@ -30,13 +30,9 @@ idsBetweenRows min max = [ seatId (r,c) | r <- [min..max], c <- [0..7] ]
 findSeat :: [Int] -> Int
 findSeat ss = head . head . filter ((==1) . length) . map (filter (`notElem` ss)) $ zipWith idsBetweenRows [0..] [127,126..]
 
-main = do
-  ids <- map (seatId . seatPos . parsePass) . lines <$> readFile "day5.input"
-  print . (++) "Part 1: " . show $ maximum ids
-  print . (++) "Part 2: " . show $ findSeat ids
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ids = map (seatId . seatPos . parsePass) $ lines input
+    part1 = show $ maximum ids
+    part2 = show $ findSeat ids

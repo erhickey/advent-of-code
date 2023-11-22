@@ -26,13 +26,9 @@ moveWithAim (x, y, a) (Up, n) = (x, y, a - n)
 answer :: Position -> Int
 answer (x, y, _) = x * y
 
-main = do
-  input <- map parse . lines <$> readFile "day2.input"
-  print . (++) "Part 1: " . show . answer $ foldl move (0, 0, 0) input
-  print . (++) "Part 2: " . show . answer $ foldl moveWithAim (0, 0, 0) input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ms = map parse $ lines input
+    part1 = show . answer $ foldl move (0, 0, 0) ms
+    part2 = show . answer $ foldl moveWithAim (0, 0, 0) ms

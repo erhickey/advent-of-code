@@ -60,14 +60,10 @@ vaporize origin xs = foldl go [] $ sortClockwise origin xs
       | isVisible xs origin target = acc ++ [target]
       | otherwise = acc
 
-main = do
-  input <- parse . lines <$> readFile "day10.input"
-  let (station, visible) = best input
-  print . (++) "Part 1: " . show $ length visible
-  print . (++) "Part 2: " . show . (\(x, y) -> 100 * x + y) $ vaporize station visible !! 199
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    cs = parse $ lines input
+    (station, visible) = best cs
+    part1 = show $ length visible
+    part2 = show . (\(x, y) -> 100 * x + y) $ vaporize station visible !! 199

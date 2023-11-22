@@ -58,7 +58,7 @@ alterSeat _ f m c Unoccupied
 
 doRound :: Int -> (Seats -> Coord -> Int) -> Seats -> Seats
 doRound n f m = M.mapWithKey go m
-  where go c p = alterSeat n f m c p
+  where go = alterSeat n f m
 
 equalize :: (Seats -> Seats) -> Seats -> Seats
 equalize f m = fst . head . dropWhile (uncurry (/=)) $ iterate (\(m', _) -> (f m', m')) (m, M.empty)
@@ -73,13 +73,9 @@ printSeats = map printRow . groupBy ((==) `on` fst . fst) . M.toAscList
         printSeat Unoccupied = 'L'
         printSeat Occupied = '#'
 
-main = do
-  m <- parse . lines <$> readFile "day11.input"
-  print . (++) "Part 1: " . show . occupiedCount $ equalize (doRound 4 adjacentOccupied) m
-  print . (++) "Part 2: " . show . occupiedCount $ equalize (doRound 5 lookAround) m
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    m = parse $ lines input
+    part1 = show . occupiedCount $ equalize (doRound 4 adjacentOccupied) m
+    part2 = show . occupiedCount $ equalize (doRound 5 lookAround) m

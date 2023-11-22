@@ -25,13 +25,9 @@ play n xs = runST $ do
   (ln,_) <- iterateUntilM ((== n) . snd) (doTurn vec) state
   pure ln
 
-main = do
-  input <- map read . splitOn "," . filter (/='\n') <$> readFile "day15.input"
-  print . (++) "Part 1: " . show $ play 2020 input
-  print . (++) "Part 2: " . show $ play 30000000 input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = map read . splitOn "," $ filter (/='\n') input
+    part1 = show $ play 2020 ns
+    part2 = show $ play 30000000 ns

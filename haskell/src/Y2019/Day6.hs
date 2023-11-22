@@ -21,15 +21,11 @@ pathFinder start end f =
   let paths = [start]:(paths >>= \path@(node:_) -> map (:path) . filter (not . flip elem path) $ f node)
   in  head $ filter ((== end) . head) paths
 
-main = do
-  input <- map parseLine . lines <$> readFile "day6.input"
-  let p1 = M.fromListWith (++) $ map (second (:[])) input
-      p2 = M.fromListWith (++) $ concatMap (\(x, y) -> [(x, [y]), (y, [x])]) input
-  print . (++) "Part 1: " . show $ sumOrbits p1 1 "COM"
-  print . (++) "Part 2: " . show . flip (-) 3 . length $ pathFinder "YOU" "SAN" (p2 !)
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ss = map parseLine $ lines input
+    p1 = M.fromListWith (++) $ map (second (:[])) ss
+    p2 = M.fromListWith (++) $ concatMap (\(x, y) -> [(x, [y]), (y, [x])]) ss
+    part1 = show $ sumOrbits p1 1 "COM"
+    part2 = show . flip (-) 3 . length $ pathFinder "YOU" "SAN" (p2 !)

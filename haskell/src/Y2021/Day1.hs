@@ -9,13 +9,9 @@ slidingWindow = reverse . go []
 solver :: [Int] -> Int
 solver xs@(x:_) = sum $ zipWith (\x y -> fromEnum $ x > y) xs (x:xs)
 
-main = do
-  input <- map read . lines <$> readFile "day1.input"
-  print . (++) "Part 1: " . show $ solver input
-  print . (++) "Part 2: " . show . solver . map sum $ slidingWindow input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = map read $ lines input
+    part1 = show $ solver ns
+    part2 = show . solver . map sum $ slidingWindow ns

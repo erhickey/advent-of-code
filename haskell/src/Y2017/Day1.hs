@@ -11,14 +11,10 @@ sSum xs ixMod n (currIx, c)
           | otherwise = ix'
           where ix' = currIx + ixMod
 
-main = do
-  input <- filter (/= '\n') <$> readFile "day1.input"
-  let xs = zip [0..] input
-  print . (++) "Part 1: " . show $ foldl (sSum input 1) 0 xs
-  print . (++) "Part 2: " . show $ foldl (sSum input $ div (length input) 2) 0 xs
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    line = filter (/= '\n') input
+    xs = zip [0..] line
+    part1 = show $ foldl (sSum line 1) 0 xs
+    part2 = show $ foldl (sSum line $ div (length line) 2) 0 xs

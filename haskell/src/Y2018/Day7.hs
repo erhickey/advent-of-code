@@ -25,8 +25,8 @@ stepOrder m
   | otherwise = next:stepOrder (completeStep next m)
   where Just next = nextStep m
 
-part2 :: Deps -> Int
-part2 = go 0 []
+p2 :: Deps -> Int
+p2 = go 0 []
   where go n ws m
           | M.null m = (+) n . maximum . map fst $ ws
           | length ws < 5 && isJust next = let (Just c) = next in go n ((ord c - 4, c):ws) $ M.delete c m
@@ -35,13 +35,9 @@ part2 = go 0 []
                 done = minimum ws
                 dec i = map (\(x,y) -> (x - i, y))
 
-main = do
-    input <- parse <$> readFile "day7.input"
-    print . (++) "Part 1: " $ stepOrder input
-    print . (++) "Part 2: " . show . part2 $ input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    deps = parse input
+    part1 = stepOrder deps
+    part2 = show $ p2 deps

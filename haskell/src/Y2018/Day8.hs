@@ -11,13 +11,9 @@ nodeValue :: Tree [Int] -> Int
 nodeValue (Node ms []) = sum ms
 nodeValue (Node ms cs) = sum [ nodeValue $ cs !! (m - 1) | m <- ms, m <= length cs, m /= 0]
 
-main = do
-    tree <- parseTree . map read . words <$> readFile "day8.input"
-    print . (++) "Part 1: " . show . sum $ fmap sum tree
-    print . (++) "Part 2: " . show $ nodeValue tree
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    tree = parseTree . map read $ words input
+    part1 = show . sum $ fmap sum tree
+    part2 = show $ nodeValue tree

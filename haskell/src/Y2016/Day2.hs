@@ -50,15 +50,9 @@ move g c i
 getPoint :: Grid -> Coord -> Char
 getPoint g (x, y) = (g !! x) !! y
 
-main = do
-  instructions <- map (map parseInstruction) . lines <$> readFile "day2.input"
-  let p1 = map (getPoint part1Grid . foldl (move part1Grid) (1, 1)) instructions
-      p2 = map (getPoint part2Grid . foldl (move part2Grid) (0, 2)) instructions
-  print $ "Part 1: " ++ p1
-  print $ "Part 2: " ++ p2
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    instructions = map (map parseInstruction) . lines $ input
+    part1 = map (getPoint part1Grid . foldl (move part1Grid) (1, 1)) instructions
+    part2 = map (getPoint part2Grid . foldl (move part2Grid) (0, 2)) instructions

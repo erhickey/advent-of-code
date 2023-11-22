@@ -45,16 +45,12 @@ interpolateSum n rules state@(it, _, _, _) =
         mult = nextSum - currSum
     in currSum + (n - it) * mult
 
-main = do
-  input <- filter (not . null) . lines <$> readFile "day12.input"
-  let initialState = (0, 0, False, drop 15 $ head input)
-      rules = parseNotes $ tail input
-      generations = iterate (`advance` rules) initialState
-  print . (++) "Part 1: " . show . stateSum $ generations !! 20
-  print . (++) "Part 2: " . show . interpolateSum 50000000000 rules . head $ dropWhile (\(_,_,c,_) -> not c) generations
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ls = filter (not . null) $ lines input
+    initialState = (0, 0, False, drop 15 $ head ls)
+    rules = parseNotes $ tail ls
+    generations = iterate (`advance` rules) initialState
+    part1 = show . stateSum $ generations !! 20
+    part2 = show . interpolateSum 50000000000 rules . head $ dropWhile (\(_,_,c,_) -> not c) generations

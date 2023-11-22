@@ -11,13 +11,9 @@ parseLine s = read s
 firstDupe :: [Int] -> Int
 firstDupe xs = fst . head . filter (uncurry member) . zip xs . scanl (flip insert) empty $ xs
 
-main = do
-  input <- map parseLine . lines <$> readFile "day1.input"
-  print . (++) "Part 1: " . show . sum $ input
-  print . (++) "Part 2: " . show . firstDupe . scanl' (+) 0 . cycle $ input
-
 solve :: String -> (String, String)
 solve input = (part1, part2)
   where
-    part1 = ""
-    part2 = ""
+    ns = map parseLine $ lines input
+    part1 = show . sum $ ns
+    part2 = show . firstDupe . scanl' (+) 0 . cycle $ ns
