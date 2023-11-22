@@ -91,7 +91,7 @@ main = do
   printf "part 2: %s\n" part2
   end <- getCurrentTime
   putStrLn "---------------------------"
-  printf "run time: %ss\n" (show . nominalDiffTimeToSeconds $ diffUTCTime end start)
+  printf "run time: %ss" (show . nominalDiffTimeToSeconds $ diffUTCTime end start)
 
 solver :: Int -> Int -> (String -> (String, String))
 solver 1 2015 = Y2015_1.solve
