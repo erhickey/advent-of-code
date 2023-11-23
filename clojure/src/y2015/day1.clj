@@ -6,6 +6,6 @@
   (+ acc (if (= c \)) -1 1)))
 
 (defn solve [input]
-  (let [part1 (reduce traverse (conj (seq input) 0))
-        part2 (index-of -1 (reductions traverse (conj (seq input) 0)))]
+  (let [part1 (reduce traverse 0 (seq input))
+        part2 (index-of -1 (reductions traverse 0 (seq input)))]
         [part1 part2]))
