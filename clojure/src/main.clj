@@ -1,6 +1,7 @@
 (ns main
   (:require
-    [y2015.day1]))
+    [y2015.day1]
+    [y2015.day5]))
 
 (defn -main [day year inputFile]
   (println (str "\n" year " day " day))

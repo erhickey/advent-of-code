@@ -1,10 +1,9 @@
-(ns y2015.day1)
+(ns y2015.day1
+  (:require
+    [util.collection :refer[index-of]]))
 
 (defn traverse [acc c]
   (+ acc (if (= c \)) -1 1)))
-
-(defn index-of [item coll]
-  (count (take-while (partial not= item) coll)))
 
 (defn solve [input]
   (let [part1 (reduce traverse (conj (seq input) 0))
