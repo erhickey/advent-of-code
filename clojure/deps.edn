@@ -1,9 +1,10 @@
 {:paths
- ["src"]
+  ["src"]
 
- :deps
- {org.clojure/clojure    {:mvn/version "1.11.1"}}
+  :deps
+    {org.clojure/clojure    {:mvn/version "1.11.1"}
+    instaparse/instaparse  {:mvn/version "1.4.12"}}
 
- :aliases
- {:solve
-  {:main-opts ["-m" "main"]}}}
+  :aliases
+    {:solve
+      {:main-opts ["-m" "main"]}}}

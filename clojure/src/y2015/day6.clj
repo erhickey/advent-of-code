@@ -1,66 +1,40 @@
 (ns y2015.day6
   (:require
-   [clojure.string :refer [split split-lines]]
-   [util.collection :refer [in?]]))
+   [clojure.string :refer [split-lines]]
+   [instaparse.core :as insta]
+   [util.vec2d :refer [grid-assoc grid-create grid-get grid-vals]]))
 
-(defn create-grid [default]
-  (let [xs (range 0 1000)
-        ys (range 0 1000)
-        keys (mapcat #(map (fn [y] (str % ":" y)) ys) xs)]
-    (zipmap keys (repeat default))))
+(defn adjust-brightness [value grid x y]
+  (grid-assoc grid x y (max 0 (+ value (grid-get grid x y)))))
 
-(defn toggle [grid key]
-  (assoc grid key (not (get grid key))))
+(defn create-action [f1 f2 x1 y1 x2 y2]
+  (fn [part grid]
+    (let [f (if (= part 1) f1 f2)
+          xs (range x1 (+ x2 1))
+          ys (range y1 (+ y2 1))
+          coords (mapcat #(map (fn [y] [% y]) ys) xs)]
+      (reduce (fn [acc [x y]] (f acc x y)) grid coords))))
 
-(defn turn-on [grid key]
-  (assoc grid key true))
+(def parse-action
+  (insta/parser
+    "<action> = on | off | toggle
+     on = <'turn on '> number <','> number <' through '> number <','> number
+     off = <'turn off '> number <','> number <' through '> number <','> number
+     toggle = <'toggle '> number <','> number <' through '> number <','> number
+     number = #'[0-9]+'"))
 
-(defn turn-off [grid key]
-  (assoc grid key false))
+(defn transform-action [tree]
+  (insta/transform
+    {:on (partial create-action #(grid-assoc %1 %2 %3 true) (partial adjust-brightness 1))
+     :off (partial create-action #(grid-assoc %1 %2 %3 false) (partial adjust-brightness -1))
+     :toggle (partial create-action #(grid-assoc %1 %2 %3 (not (grid-get %1 %2 %3))) (partial adjust-brightness 2))
+     :number read-string} tree))
 
-(defn adjust-brightness [grid key val]
-  (assoc grid key (max 0 (+ val (get grid key)))))
-
-(defn parse-action-1 [s]
-  (let [token (subs s 0 7)]
-    (case token
-          "toggle " toggle
-          "turn on" turn-on
-          "turn of" turn-off)))
-
-(defn parse-action-2 [s]
-  (let [token (subs s 0 7)]
-    (case token
-          "toggle " (fn [grid key] (adjust-brightness grid key 2))
-          "turn on" (fn [grid key] (adjust-brightness grid key 1))
-          "turn of" (fn [grid key] (adjust-brightness grid key -1)))))
-
-(defn parse-coords [s]
-  (let [[x1, y1, x2, y2] (map (fn [n] (Integer/parseInt n)) (mapcat (fn [w] (split w #",")) (filter #(in? (seq %) \,) (split s #" "))))
-        xs (range x1 (+ x2 1))
-        ys (range y1 (+ y2 1))]
-    (mapcat #(map (fn [y] (str % ":" y)) ys) xs)))
-
-(defn parse-instruction-1 [s]
-  (list (parse-action-1 s) (parse-coords s)))
-
-(defn parse-instruction-2 [s]
-  (list (parse-action-2 s) (parse-coords s)))
-
-(defn follow-instruction [grid instruction]
-  (let [[action coords] instruction]
-    (reduce (fn [g c] (action g c)) grid coords)))
-
-(defn follow-instructions [grid instructions]
-  (reduce (fn [g i] (follow-instruction g i)) grid instructions))
+(defn run-actions [part actions]
+  (reduce (fn [acc f] (f part acc)) (grid-create 1000 1000 (if (= part 1) false 0)) actions))
 
 (defn solve [input]
-  (let [grid-1 (create-grid false)
-        grid-2 (create-grid 0)
-        instructions-1 (map parse-instruction-1 (split-lines input))
-        instructions-2 (map parse-instruction-2 (split-lines input))
-        complete-grid-1 (follow-instructions grid-1 instructions-1)
-        complete-grid-2 (follow-instructions grid-2 instructions-2)
-        part1 (count (filter #(= true %) (vals complete-grid-1)))
-        part2 (apply + (vals complete-grid-2))]
+  (let [actions (mapcat #(transform-action (parse-action %)) (split-lines input))
+        part1 (count (filter (partial = true) (grid-vals (run-actions 1 actions))))
+        part2 (apply + (grid-vals (run-actions 2 actions)))]
     [part1 part2]))
