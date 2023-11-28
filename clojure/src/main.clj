@@ -3,7 +3,8 @@
     [y2015.day1]
     [y2015.day5]
     [y2015.day6]
-    [y2015.day7]))
+    [y2015.day7]
+    [y2015.day8]))
 
 (defn -main [day year inputFile]
   (println (str "\n" year " day " day))
