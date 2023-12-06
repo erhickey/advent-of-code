@@ -35,7 +35,9 @@
   (reduce find-destination seed maps))
 
 (defn update-dest-range [m seed-range]
-  (let [in-range? (and (<= (:start seed-range) (:end m)) (>= (:end seed-range) (:start m)))
+  (let [in-range? (and
+                    (<= (:start seed-range) (:end m))
+                    (>= (:end seed-range) (:start m)))
         start-diff (- (:start seed-range) (:start m))
         end-diff (- (:end seed-range) (:start seed-range))
         new-start (+ (:dest m) start-diff)
@@ -44,24 +46,26 @@
 
 (defn do-split [seed-range m]
   (let [start-1 (:start seed-range)
-        end-1 (if
-                (or (< (:end seed-range) (:start m)) (> (:start seed-range) (:end m)))
-                (:end seed-range)
-                (if
-                  (< start-1 (:start m))
+        end-1 (cond
+                (or
+                  (< (:end seed-range) (:start m))
+                  (> (:start seed-range) (:end m)))
+                    (:end seed-range)
+                (< start-1 (:start m))
                   (- (:start m) 1)
-                  (min (:end seed-range) (:end m))))
+                :else
+                  (min (:end seed-range) (:end m)))
         start-2 (if
                   (< end-1 (:end seed-range))
                   (+ 1 end-1)
                   nil)
-        end-2 (if
+        end-2 (cond
                 (= nil start-2)
-                nil
-                (if
-                  (>= start-2 (:end m))
+                  nil
+                (>= start-2 (:end m))
                   (:end seed-range)
-                  (min (:end seed-range) (:end m))))
+                :else
+                  (min (:end seed-range) (:end m)))
         start-3 (if
                   (and (not= end-2 nil) (not= end-2 (:end seed-range)))
                   (+ 1 end-2)
@@ -76,7 +80,12 @@
   (mapcat #(do-split % m) seeds))
 
 (defn get-location-ranges [maps seeds]
-  (reduce (fn [ss ms] (map (fn [{:keys [start end]}] {:start start :end end}) (reduce split-seeds ss ms))) seeds maps))
+  (reduce
+    (fn [ss ms] (map
+                  (fn [{:keys [start end]}] {:start start :end end})
+                  (reduce split-seeds ss ms)))
+    seeds
+    maps))
 
 (defn solve [input]
   (let [sections (s/split input #"\n\n")
