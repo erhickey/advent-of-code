@@ -19,9 +19,17 @@
 
 (def pattern "1|2|3|4|5|6|7|8|9|one|two|three|four|five|six|seven|eight|nine")
 
+; original solution, reverse the pattern and string to find last match
+; (defn to-num-2 [line]
+;   (let [first-match (re-find (re-pattern pattern) line)
+;         last-match (s/reverse (re-find (re-pattern (s/reverse pattern)) (s/reverse line)))]
+;     (read-string (str (num-map first-match first-match) (num-map last-match last-match)))))
+
+; alternative solution, use lookahead assertion to find all matches, including overlapping matches
 (defn to-num-2 [line]
-  (let [first-match (re-find (re-pattern pattern) line)
-        last-match (s/reverse (re-find (re-pattern (s/reverse pattern)) (s/reverse line)))]
+  (let [matches (map last (re-seq (re-pattern (str "(?=(" pattern "))")) line))
+        first-match (first matches)
+        last-match (last matches)]
     (read-string (str (num-map first-match first-match) (num-map last-match last-match)))))
 
 (defn solve [input]
