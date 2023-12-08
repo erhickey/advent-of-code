@@ -5,3 +5,6 @@
 
 (defn index-of [item coll]
   (count (take-while (partial not= item) coll)))
+
+(defn occurrences [coll e]
+  (count (filter #{e} coll)))
